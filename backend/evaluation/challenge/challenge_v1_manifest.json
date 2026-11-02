@@ -1,0 +1,9 @@
+{
+  "note": "Frozen before any model run. Any change to these hashes means the comparison has to be declared again.",
+  "status": "Never run. Gold is an author draft awaiting independent review.",
+  "inputs_sha256": "5d1bbf6021b9fc77371e7fd63ff8ad7f2a7f3a262ae1b5668f757d45e7130062",
+  "gold_draft_sha256": "b57a3e755ccfc87819bd662333c947cae34b204b572396771183a510b73d0e85",
+  "baseline_prompt_sha256": "8b61f0da34140a7b4b4851ad813039a90ccf49c3dae78f064fc37a4290e9d101",
+  "fair_prompt_version": "v5",
+  "fair_prompt_sha256": "b1f3ccab20e26cd4d071b4555839bc3c5fa64c5aaa06ebd507b720b5db55053f"
+}

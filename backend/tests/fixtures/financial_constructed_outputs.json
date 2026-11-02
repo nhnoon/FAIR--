@@ -1,0 +1,450 @@
+{
+ "note": "HAND-WRITTEN correct answers to the challenge cases, not model predictions. They test FAIR's downstream checks only and say nothing about model accuracy.",
+ "outputs": {
+  "CH-01": {
+   "extraction": {
+    "currency": {
+     "value": "USD",
+     "evidence": "billed annually as one payment of USD 96"
+    },
+    "recurring_price": {
+     "value": "USD 96",
+     "evidence": "billed annually as one payment of USD 96"
+    },
+    "billing_period": {
+     "value": "yearly",
+     "evidence": "billed annually as one payment of USD 96"
+    },
+    "auto_renewal": {
+     "value": "yes",
+     "evidence": "Your plan renews each year at the then-current price."
+    }
+   },
+   "verdict": "CONTRADICTION",
+   "verdict_evidence": "billed annually as one payment of USD 96",
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "I pay USD 8 each month.",
+     "topic": "price",
+     "verdict": "CONTRADICTION",
+     "evidence": "billed annually as one payment of USD 96",
+     "evidence_role": "contradicts",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    },
+    {
+     "text": "I can stop after any month.",
+     "topic": "cancellation",
+     "verdict": "UNKNOWN",
+     "evidence": null,
+     "evidence_role": null,
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-02": {
+   "extraction": {
+    "currency": {
+     "value": "USD",
+     "evidence": "Founding members keep USD 12/month for as long as their subscription stays active."
+    },
+    "recurring_price": {
+     "value": "USD 12",
+     "evidence": "Founding members keep USD 12/month for as long as their subscription stays active."
+    },
+    "billing_period": {
+     "value": "monthly",
+     "evidence": "Founding members keep USD 12/month for as long as their subscription stays active."
+    }
+   },
+   "verdict": "MATCH",
+   "verdict_evidence": "Founding members keep USD 12/month for as long as their subscription stays active.",
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "My price is locked for as long as I stay subscribed.",
+     "topic": "price",
+     "verdict": "MATCH",
+     "evidence": "Founding members keep USD 12/month for as long as their subscription stays active.",
+     "evidence_role": "supports",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-03": {
+   "extraction": {
+    "currency": {
+     "value": "USD",
+     "evidence": "The Plus plan is USD 15/month."
+    },
+    "recurring_price": {
+     "value": "USD 15",
+     "evidence": "The Plus plan is USD 15/month."
+    },
+    "billing_period": {
+     "value": "monthly",
+     "evidence": "The Plus plan is USD 15/month."
+    }
+   },
+   "verdict": "CONTRADICTION",
+   "verdict_evidence": "We may change prices at any time with 30 days' notice by email.",
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "My Plus price cannot go up during the next year.",
+     "topic": "price",
+     "verdict": "CONTRADICTION",
+     "evidence": "We may change prices at any time with 30 days' notice by email.",
+     "evidence_role": "contradicts",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-04": {
+   "extraction": {
+    "currency": {
+     "value": "USD",
+     "evidence": "Team plan: USD 20 per seat per month."
+    },
+    "recurring_price": {
+     "value": "USD 20",
+     "evidence": "Team plan: USD 20 per seat per month."
+    },
+    "billing_period": {
+     "value": "monthly",
+     "evidence": "Team plan: USD 20 per seat per month."
+    }
+   },
+   "verdict": "UNKNOWN",
+   "verdict_evidence": null,
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "Removing a seat refunds the rest of that month.",
+     "topic": "refund",
+     "verdict": "UNKNOWN",
+     "evidence": null,
+     "evidence_role": null,
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-05": {
+   "extraction": {
+    "currency": {
+     "value": "USD",
+     "evidence": "Stream everything for USD 10/month."
+    },
+    "recurring_price": {
+     "value": "USD 10",
+     "evidence": "Stream everything for USD 10/month."
+    },
+    "billing_period": {
+     "value": "monthly",
+     "evidence": "Stream everything for USD 10/month."
+    }
+   },
+   "verdict": "CONTRADICTION",
+   "verdict_evidence": "*A USD 4.50 monthly device fee applies to each TV app.",
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "USD 10 a month is all I will pay to watch on my TV app.",
+     "topic": "fees",
+     "verdict": "CONTRADICTION",
+     "evidence": "*A USD 4.50 monthly device fee applies to each TV app.",
+     "evidence_role": "contradicts",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-06": {
+   "extraction": {
+    "currency": {
+     "value": "USD",
+     "evidence": "Annual Backup costs USD 60/year and renews automatically."
+    },
+    "recurring_price": {
+     "value": "USD 60",
+     "evidence": "Annual Backup costs USD 60/year and renews automatically."
+    },
+    "billing_period": {
+     "value": "yearly",
+     "evidence": "Annual Backup costs USD 60/year and renews automatically."
+    },
+    "auto_renewal": {
+     "value": "yes",
+     "evidence": "Annual Backup costs USD 60/year and renews automatically."
+    }
+   },
+   "verdict": "CONTRADICTION",
+   "verdict_evidence": "Refunds are not available after 14 days.",
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "I can get a full refund at any time.",
+     "topic": "refund",
+     "verdict": "CONTRADICTION",
+     "evidence": "Refunds are not available after 14 days.",
+     "evidence_role": "contradicts",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-07": {
+   "extraction": {
+    "currency": {
+     "value": "USD",
+     "evidence": "Membership is USD 30/month with a 12-month minimum term."
+    },
+    "recurring_price": {
+     "value": "USD 30",
+     "evidence": "Membership is USD 30/month with a 12-month minimum term."
+    },
+    "billing_period": {
+     "value": "monthly",
+     "evidence": "Membership is USD 30/month with a 12-month minimum term."
+    }
+   },
+   "verdict": "CONTRADICTION",
+   "verdict_evidence": "paused months extend your minimum term",
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "Pausing for 2 months lets me finish my minimum term 2 months sooner.",
+     "topic": "other",
+     "verdict": "CONTRADICTION",
+     "evidence": "paused months extend your minimum term",
+     "evidence_role": "contradicts",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-08": {
+   "extraction": {
+    "currency": {
+     "value": "ريال",
+     "evidence": "الباقة السنوية 468 ريالًا تُدفع مرة واحدة كل سنة"
+    },
+    "recurring_price": {
+     "value": "468 ريال",
+     "evidence": "الباقة السنوية 468 ريالًا تُدفع مرة واحدة كل سنة"
+    },
+    "billing_period": {
+     "value": "yearly",
+     "evidence": "الباقة السنوية 468 ريالًا تُدفع مرة واحدة كل سنة"
+    }
+   },
+   "verdict": "CONTRADICTION",
+   "verdict_evidence": "الباقة السنوية 468 ريالًا تُدفع مرة واحدة كل سنة",
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "في الباقة السنوية سأدفع 39 ريالًا كل شهر.",
+     "topic": "price",
+     "verdict": "CONTRADICTION",
+     "evidence": "الباقة السنوية 468 ريالًا تُدفع مرة واحدة كل سنة",
+     "evidence_role": "contradicts",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-09": {
+   "extraction": {
+    "currency": {
+     "value": "ريال",
+     "evidence": "اشتراك الطلاب 15 ريالًا شهريًا"
+    },
+    "recurring_price": {
+     "value": "15 ريال",
+     "evidence": "اشتراك الطلاب 15 ريالًا شهريًا"
+    },
+    "billing_period": {
+     "value": "monthly",
+     "evidence": "اشتراك الطلاب 15 ريالًا شهريًا"
+    }
+   },
+   "verdict": "UNKNOWN",
+   "verdict_evidence": null,
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "بعد تخرجي سأدفع سعرًا أقل من السعر العادي.",
+     "topic": "price",
+     "verdict": "UNKNOWN",
+     "evidence": null,
+     "evidence_role": null,
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-10": {
+   "extraction": {
+    "currency": {
+     "value": "SAR",
+     "evidence": "بعد ذلك يصبح السعر 40 SAR شهريًا."
+    },
+    "intro_price": {
+     "value": "25 SAR",
+     "evidence": "Monthly access is 25 SAR for the first 3 months."
+    },
+    "intro_periods": {
+     "value": 3,
+     "evidence": "Monthly access is 25 SAR for the first 3 months."
+    },
+    "recurring_price": {
+     "value": "40 SAR",
+     "evidence": "بعد ذلك يصبح السعر 40 SAR شهريًا."
+    },
+    "billing_period": {
+     "value": "monthly",
+     "evidence": "بعد ذلك يصبح السعر 40 SAR شهريًا."
+    }
+   },
+   "verdict": "CONTRADICTION",
+   "verdict_evidence": "Cancel anytime from the app.",
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "I can cancel anytime.",
+     "topic": "cancellation",
+     "verdict": "MATCH",
+     "evidence": "Cancel anytime from the app.",
+     "evidence_role": "supports",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    },
+    {
+     "text": "The price stays at 25 SAR.",
+     "topic": "price",
+     "verdict": "CONTRADICTION",
+     "evidence": "بعد ذلك يصبح السعر 40 SAR شهريًا.",
+     "evidence_role": "contradicts",
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-11": {
+   "extraction": {
+    "currency": {
+     "value": "SAR",
+     "evidence": "Your plan renews automatically every month at 19 SAR."
+    },
+    "recurring_price": {
+     "value": "19 SAR",
+     "evidence": "Your plan renews automatically every month at 19 SAR."
+    },
+    "billing_period": {
+     "value": "monthly",
+     "evidence": "Your plan renews automatically every month at 19 SAR."
+    }
+   },
+   "verdict": "UNKNOWN",
+   "verdict_evidence": null,
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "My plan renews automatically without asking me.",
+     "topic": "renewal",
+     "verdict": "UNKNOWN",
+     "evidence": null,
+     "evidence_role": null,
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  },
+  "CH-12": {
+   "extraction": {},
+   "verdict": "UNKNOWN",
+   "verdict_evidence": null,
+   "explanation": {
+    "en": "x",
+    "ar": "س"
+   },
+   "claims": [
+    {
+     "text": "A gift subscription costs USD 5 in my country.",
+     "topic": "price",
+     "verdict": "UNKNOWN",
+     "evidence": null,
+     "evidence_role": null,
+     "explanation": {
+      "en": "x",
+      "ar": "س"
+     }
+    }
+   ]
+  }
+ }
+}

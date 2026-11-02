@@ -1,0 +1,40 @@
+# --- Private / out of scope: never track ---
+data/Downloads/
+**/Downloads/
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Python ---
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# --- Node / frontend ---
+node_modules/
+dist/
+build/
+.vite/
+*.log
+npm-debug.log*
+
+# --- Evaluation run outputs (commit a final run deliberately, if at all) ---
+backend/evaluation/runs/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

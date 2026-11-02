@@ -1,0 +1,850 @@
+{
+  "note": "Backend responses from offline replay of Phase 11 model outputs. Generated: a backend test keeps this in sync. Not live results.",
+  "cases": {
+    "FAIR-003": {
+      "terms": "Plan is USD 9.99/month and renews automatically. Cancellation must be submitted at least 48 hours before the next renewal date.",
+      "expectation": "I can cancel one hour before renewal and avoid the next charge.",
+      "body": {
+        "verdict": "CONTRADICTION",
+        "verdict_downgraded": false,
+        "model_verdict": "CONTRADICTION",
+        "verdict_evidence": {
+          "quote": "Cancellation must be submitted at least 48 hours before the next renewal date.",
+          "verified": true,
+          "start": 49,
+          "end": 127,
+          "reason": null
+        },
+        "explanation": {
+          "en": "The terms require cancellation at least 48 hours before renewal, so cancelling 1 hour before would be too late.",
+          "ar": "تشترط الشروط الإلغاء قبل التجديد بـ 48 ساعة على الأقل، لذا فالإلغاء قبل التجديد بساعة واحدة سيكون متأخرًا."
+        },
+        "extracted_terms": {
+          "currency": "USD",
+          "trial_days": null,
+          "intro_price": null,
+          "intro_periods": null,
+          "recurring_price": "9.99",
+          "billing_period": "monthly",
+          "auto_renewal": "yes",
+          "cancellation_requirement": "must be submitted at least 48 hours before the next renewal date",
+          "cancel_by": "renewal",
+          "cancel_notice": {
+            "amount": 48,
+            "unit": "hours"
+          },
+          "one_time_fees": []
+        },
+        "facts": [
+          {
+            "field": "currency",
+            "value": "USD",
+            "evidence": {
+              "quote": "Plan is USD 9.99/month and renews automatically.",
+              "verified": true,
+              "start": 0,
+              "end": 48,
+              "reason": null
+            }
+          },
+          {
+            "field": "recurring_price",
+            "value": "9.99",
+            "evidence": {
+              "quote": "Plan is USD 9.99/month and renews automatically.",
+              "verified": true,
+              "start": 0,
+              "end": 48,
+              "reason": null
+            }
+          },
+          {
+            "field": "billing_period",
+            "value": "monthly",
+            "evidence": {
+              "quote": "Plan is USD 9.99/month and renews automatically.",
+              "verified": true,
+              "start": 0,
+              "end": 48,
+              "reason": null
+            }
+          },
+          {
+            "field": "auto_renewal",
+            "value": "yes",
+            "evidence": {
+              "quote": "Plan is USD 9.99/month and renews automatically.",
+              "verified": true,
+              "start": 0,
+              "end": 48,
+              "reason": null
+            }
+          },
+          {
+            "field": "cancellation_requirement",
+            "value": "must be submitted at least 48 hours before the next renewal date",
+            "evidence": {
+              "quote": "Cancellation must be submitted at least 48 hours before the next renewal date.",
+              "verified": true,
+              "start": 49,
+              "end": 127,
+              "reason": null
+            }
+          },
+          {
+            "field": "cancel_by",
+            "value": "renewal",
+            "evidence": {
+              "quote": "Cancellation must be submitted at least 48 hours before the next renewal date.",
+              "verified": true,
+              "start": 49,
+              "end": 127,
+              "reason": null
+            }
+          },
+          {
+            "field": "cancel_notice",
+            "value": {
+              "amount": 48,
+              "unit": "hours"
+            },
+            "evidence": {
+              "quote": "Cancellation must be submitted at least 48 hours before the next renewal date.",
+              "verified": true,
+              "start": 49,
+              "end": 127,
+              "reason": null
+            }
+          }
+        ],
+        "rejected_facts": [],
+        "cost": {
+          "currency": "USD",
+          "trial_days": 0,
+          "due_at_signup": "9.99",
+          "first_paid_charge_day": 0,
+          "first_paid_charge_amount": "9.99",
+          "one_time_fees_total": "0",
+          "projections": [
+            {
+              "months": 1,
+              "status": "complete",
+              "total": "9.99",
+              "assumptions": [
+                "Counts the first 1 month(s) of billing, starting when the free trial (if any) ends.",
+                "Assumes you do not cancel during this period."
+              ],
+              "assumption_codes": [
+                "horizon",
+                "no_cancel"
+              ],
+              "missing": []
+            },
+            {
+              "months": 3,
+              "status": "complete",
+              "total": "29.97",
+              "assumptions": [
+                "Counts the first 3 month(s) of billing, starting when the free trial (if any) ends.",
+                "Assumes you do not cancel during this period."
+              ],
+              "assumption_codes": [
+                "horizon",
+                "no_cancel"
+              ],
+              "missing": []
+            },
+            {
+              "months": 12,
+              "status": "complete",
+              "total": "119.88",
+              "assumptions": [
+                "Counts the first 12 month(s) of billing, starting when the free trial (if any) ends.",
+                "Assumes you do not cancel during this period."
+              ],
+              "assumption_codes": [
+                "horizon",
+                "no_cancel"
+              ],
+              "missing": []
+            }
+          ],
+          "notes": [
+            "No free trial is stated."
+          ],
+          "note_codes": [
+            "no_trial_stated"
+          ],
+          "withheld": [],
+          "not_counted": []
+        },
+        "warnings": [],
+        "model": "muse-spark-1.3",
+        "claims": [
+          {
+            "id": "claim-1",
+            "text": "I can cancel 1 hour before renewal and avoid the next charge.",
+            "topic": "cancellation",
+            "verdict": "CONTRADICTION",
+            "model_verdict": "CONTRADICTION",
+            "downgraded": false,
+            "reason": null,
+            "evidence": {
+              "quote": "Cancellation must be submitted at least 48 hours before the next renewal date.",
+              "verified": true,
+              "start": 49,
+              "end": 127,
+              "reason": null
+            },
+            "evidence_role": "contradicts",
+            "explanation": {
+              "en": "The terms require 48 hours notice, not 1 hour.",
+              "ar": "تشترط الشروط إشعارًا قبل 48 ساعة وليس قبل ساعة واحدة."
+            },
+            "from_overall": false
+          }
+        ],
+        "claims_summary": {
+          "overall": "CONTRADICTION",
+          "counts": {
+            "MATCH": 0,
+            "CONTRADICTION": 1,
+            "UNKNOWN": 0
+          },
+          "dropped": 0,
+          "omitted_amounts": 0
+        },
+        "decision": {
+          "continue_path": {
+            "key": "continue",
+            "status": "complete",
+            "reason": null,
+            "horizons": [
+              {
+                "months": 1,
+                "status": "complete",
+                "total": "9.99",
+                "lines": [
+                  {
+                    "kind": "recurring_charge",
+                    "label": null,
+                    "quantity": 1,
+                    "unit_amount": "9.99",
+                    "amount": "9.99",
+                    "source_field": "recurring_price"
+                  }
+                ],
+                "missing": []
+              },
+              {
+                "months": 3,
+                "status": "complete",
+                "total": "29.97",
+                "lines": [
+                  {
+                    "kind": "recurring_charge",
+                    "label": null,
+                    "quantity": 3,
+                    "unit_amount": "9.99",
+                    "amount": "29.97",
+                    "source_field": "recurring_price"
+                  }
+                ],
+                "missing": []
+              },
+              {
+                "months": 12,
+                "status": "complete",
+                "total": "119.88",
+                "lines": [
+                  {
+                    "kind": "recurring_charge",
+                    "label": null,
+                    "quantity": 12,
+                    "unit_amount": "9.99",
+                    "amount": "119.88",
+                    "source_field": "recurring_price"
+                  }
+                ],
+                "missing": []
+              }
+            ],
+            "assumption_codes": [
+              "horizon",
+              "no_cancel"
+            ],
+            "deadline": null
+          },
+          "cancel_path": {
+            "key": "cancel",
+            "status": "conditional",
+            "reason": null,
+            "horizons": [
+              {
+                "months": 1,
+                "status": "conditional",
+                "total": "9.99",
+                "lines": [
+                  {
+                    "kind": "recurring_charge",
+                    "label": null,
+                    "quantity": 1,
+                    "unit_amount": "9.99",
+                    "amount": "9.99",
+                    "source_field": "recurring_price"
+                  }
+                ],
+                "missing": []
+              },
+              {
+                "months": 3,
+                "status": "conditional",
+                "total": "9.99",
+                "lines": [
+                  {
+                    "kind": "recurring_charge",
+                    "label": null,
+                    "quantity": 1,
+                    "unit_amount": "9.99",
+                    "amount": "9.99",
+                    "source_field": "recurring_price"
+                  }
+                ],
+                "missing": []
+              },
+              {
+                "months": 12,
+                "status": "conditional",
+                "total": "9.99",
+                "lines": [
+                  {
+                    "kind": "recurring_charge",
+                    "label": null,
+                    "quantity": 1,
+                    "unit_amount": "9.99",
+                    "amount": "9.99",
+                    "source_field": "recurring_price"
+                  }
+                ],
+                "missing": []
+              }
+            ],
+            "assumption_codes": [
+              "cancel_before_deadline",
+              "cancellation_fee_not_stated",
+              "no_refund_assumed"
+            ],
+            "deadline": {
+              "kind": "first_renewal",
+              "day": null,
+              "notice": {
+                "amount": 48,
+                "unit": "hours"
+              },
+              "last_safe_hour": null
+            }
+          },
+          "difference": [
+            {
+              "months": 1,
+              "amount": "0.00"
+            },
+            {
+              "months": 3,
+              "amount": "19.98"
+            },
+            {
+              "months": 12,
+              "amount": "109.89"
+            }
+          ]
+        }
+      }
+    },
+    "FAIR-005": {
+      "terms": "Start using Premium for USD 9.99 today. See account settings for renewal and cancellation details.",
+      "expectation": "It definitely does not renew automatically.",
+      "body": {
+        "verdict": "UNKNOWN",
+        "verdict_downgraded": false,
+        "model_verdict": "UNKNOWN",
+        "verdict_evidence": null,
+        "explanation": {
+          "en": "The offer does not state whether Premium renews automatically; it only refers you to account settings for renewal details.",
+          "ar": "العرض لا يوضح ما إذا كان الاشتراك يتجدد تلقائيًا، بل يحيلك إلى إعدادات الحساب لمعرفة تفاصيل التجديد."
+        },
+        "extracted_terms": {
+          "currency": "USD",
+          "trial_days": null,
+          "intro_price": null,
+          "intro_periods": null,
+          "recurring_price": null,
+          "billing_period": "unknown",
+          "auto_renewal": "not_stated",
+          "cancellation_requirement": null,
+          "cancel_by": "not_stated",
+          "cancel_notice": null,
+          "one_time_fees": []
+        },
+        "facts": [
+          {
+            "field": "currency",
+            "value": "USD",
+            "evidence": {
+              "quote": "Start using Premium for USD 9.99 today.",
+              "verified": true,
+              "start": 0,
+              "end": 39,
+              "reason": null
+            }
+          }
+        ],
+        "rejected_facts": [],
+        "cost": {
+          "currency": "USD",
+          "trial_days": 0,
+          "due_at_signup": null,
+          "first_paid_charge_day": null,
+          "first_paid_charge_amount": null,
+          "one_time_fees_total": "0",
+          "projections": [
+            {
+              "months": 1,
+              "status": "unavailable",
+              "total": null,
+              "assumptions": [],
+              "assumption_codes": [],
+              "missing": [
+                "billing_period"
+              ]
+            },
+            {
+              "months": 3,
+              "status": "unavailable",
+              "total": null,
+              "assumptions": [],
+              "assumption_codes": [],
+              "missing": [
+                "billing_period"
+              ]
+            },
+            {
+              "months": 12,
+              "status": "unavailable",
+              "total": null,
+              "assumptions": [],
+              "assumption_codes": [],
+              "missing": [
+                "billing_period"
+              ]
+            }
+          ],
+          "notes": [
+            "No free trial is stated.",
+            "The amount due at signup cannot be determined from the stated terms."
+          ],
+          "note_codes": [
+            "no_trial_stated",
+            "due_at_signup_unknown"
+          ],
+          "withheld": [],
+          "not_counted": []
+        },
+        "warnings": [],
+        "model": "muse-spark-1.3",
+        "claims": [
+          {
+            "id": "claim-1",
+            "text": "The Premium subscription definitely does not renew automatically.",
+            "topic": "renewal",
+            "verdict": "UNKNOWN",
+            "model_verdict": "UNKNOWN",
+            "downgraded": false,
+            "reason": null,
+            "evidence": null,
+            "evidence_role": null,
+            "explanation": {
+              "en": "The terms do not say whether automatic renewal occurs.",
+              "ar": "الشروط لا تذكر ما إذا كان التجديد التلقائي يحدث."
+            },
+            "from_overall": false
+          }
+        ],
+        "claims_summary": {
+          "overall": "UNKNOWN",
+          "counts": {
+            "MATCH": 0,
+            "CONTRADICTION": 0,
+            "UNKNOWN": 1
+          },
+          "dropped": 0,
+          "omitted_amounts": 0
+        },
+        "decision": {
+          "continue_path": {
+            "key": "continue",
+            "status": "unavailable",
+            "reason": null,
+            "horizons": [
+              {
+                "months": 1,
+                "status": "unavailable",
+                "total": null,
+                "lines": [],
+                "missing": [
+                  "billing_period"
+                ]
+              },
+              {
+                "months": 3,
+                "status": "unavailable",
+                "total": null,
+                "lines": [],
+                "missing": [
+                  "billing_period"
+                ]
+              },
+              {
+                "months": 12,
+                "status": "unavailable",
+                "total": null,
+                "lines": [],
+                "missing": [
+                  "billing_period"
+                ]
+              }
+            ],
+            "assumption_codes": [],
+            "deadline": null
+          },
+          "cancel_path": {
+            "key": "cancel",
+            "status": "unavailable",
+            "reason": "renewal_not_stated",
+            "horizons": [],
+            "assumption_codes": [],
+            "deadline": null
+          },
+          "difference": []
+        }
+      }
+    },
+    "FAIR-007": {
+      "terms": "Introductory month: USD 7.5. From month two: USD 14.99/month. Subscription continues monthly until cancelled.",
+      "expectation": "The first month is USD 7.5 and later months cost USD 14.99.",
+      "body": {
+        "verdict": "MATCH",
+        "verdict_downgraded": false,
+        "model_verdict": "MATCH",
+        "verdict_evidence": {
+          "quote": "Introductory month: USD 7.5. From month two: USD 14.99/month.",
+          "verified": true,
+          "start": 0,
+          "end": 61,
+          "reason": null
+        },
+        "explanation": {
+          "en": "The terms state the first month costs USD 7.5 and later months cost USD 14.99, which matches the expectation.",
+          "ar": "توضح الشروط أن الشهر الأول بسعر 7.5 دولار أمريكي والأشهر اللاحقة بسعر 14.99 دولار أمريكي، وهذا يطابق التوقع."
+        },
+        "extracted_terms": {
+          "currency": "USD",
+          "trial_days": null,
+          "intro_price": "7.5",
+          "intro_periods": null,
+          "recurring_price": "14.99",
+          "billing_period": "monthly",
+          "auto_renewal": "yes",
+          "cancellation_requirement": null,
+          "cancel_by": "not_stated",
+          "cancel_notice": null,
+          "one_time_fees": []
+        },
+        "facts": [
+          {
+            "field": "currency",
+            "value": "USD",
+            "evidence": {
+              "quote": "Introductory month: USD 7.5.",
+              "verified": true,
+              "start": 0,
+              "end": 28,
+              "reason": null
+            }
+          },
+          {
+            "field": "intro_price",
+            "value": "7.5",
+            "evidence": {
+              "quote": "Introductory month: USD 7.5.",
+              "verified": true,
+              "start": 0,
+              "end": 28,
+              "reason": null
+            }
+          },
+          {
+            "field": "recurring_price",
+            "value": "14.99",
+            "evidence": {
+              "quote": "From month two: USD 14.99/month.",
+              "verified": true,
+              "start": 29,
+              "end": 61,
+              "reason": null
+            }
+          },
+          {
+            "field": "billing_period",
+            "value": "monthly",
+            "evidence": {
+              "quote": "Subscription continues monthly until cancelled.",
+              "verified": true,
+              "start": 62,
+              "end": 109,
+              "reason": null
+            }
+          },
+          {
+            "field": "auto_renewal",
+            "value": "yes",
+            "evidence": {
+              "quote": "Subscription continues monthly until cancelled.",
+              "verified": true,
+              "start": 62,
+              "end": 109,
+              "reason": null
+            }
+          }
+        ],
+        "rejected_facts": [
+          {
+            "field": "intro_periods",
+            "value": 1,
+            "evidence": {
+              "quote": "Introductory month: USD 7.5.",
+              "verified": false,
+              "start": null,
+              "end": null,
+              "reason": "value_not_in_quote"
+            }
+          }
+        ],
+        "cost": {
+          "currency": "USD",
+          "trial_days": 0,
+          "due_at_signup": "7.5",
+          "first_paid_charge_day": 0,
+          "first_paid_charge_amount": "7.5",
+          "one_time_fees_total": "0",
+          "projections": [
+            {
+              "months": 1,
+              "status": "conditional",
+              "total": "7.5",
+              "assumptions": [
+                "Counts the first 1 month(s) of billing, starting when the free trial (if any) ends.",
+                "Assumes you do not cancel during this period.",
+                "The introductory price is assumed to last one billing period (its duration is not stated)."
+              ],
+              "assumption_codes": [
+                "horizon",
+                "no_cancel",
+                "intro_one_period"
+              ],
+              "missing": []
+            },
+            {
+              "months": 3,
+              "status": "conditional",
+              "total": "37.48",
+              "assumptions": [
+                "Counts the first 3 month(s) of billing, starting when the free trial (if any) ends.",
+                "Assumes you do not cancel during this period.",
+                "The introductory price is assumed to last one billing period (its duration is not stated)."
+              ],
+              "assumption_codes": [
+                "horizon",
+                "no_cancel",
+                "intro_one_period"
+              ],
+              "missing": []
+            },
+            {
+              "months": 12,
+              "status": "conditional",
+              "total": "172.39",
+              "assumptions": [
+                "Counts the first 12 month(s) of billing, starting when the free trial (if any) ends.",
+                "Assumes you do not cancel during this period.",
+                "The introductory price is assumed to last one billing period (its duration is not stated)."
+              ],
+              "assumption_codes": [
+                "horizon",
+                "no_cancel",
+                "intro_one_period"
+              ],
+              "missing": []
+            }
+          ],
+          "notes": [
+            "No free trial is stated."
+          ],
+          "note_codes": [
+            "no_trial_stated"
+          ],
+          "withheld": [],
+          "not_counted": []
+        },
+        "warnings": [
+          "1 extracted value(s) could not be verified against the terms and were excluded."
+        ],
+        "model": "muse-spark-1.3",
+        "claims": [
+          {
+            "id": "claim-1",
+            "text": "The first month costs USD 7.5.",
+            "topic": "price",
+            "verdict": "MATCH",
+            "model_verdict": "MATCH",
+            "downgraded": false,
+            "reason": null,
+            "evidence": {
+              "quote": "Introductory month: USD 7.5.",
+              "verified": true,
+              "start": 0,
+              "end": 28,
+              "reason": null
+            },
+            "evidence_role": "supports",
+            "explanation": {
+              "en": "The terms state the introductory month price.",
+              "ar": "الشروط تذكر سعر الشهر التمهيدي."
+            },
+            "from_overall": false
+          },
+          {
+            "id": "claim-2",
+            "text": "Later months cost USD 14.99.",
+            "topic": "price",
+            "verdict": "MATCH",
+            "model_verdict": "MATCH",
+            "downgraded": false,
+            "reason": null,
+            "evidence": {
+              "quote": "From month two: USD 14.99/month.",
+              "verified": true,
+              "start": 29,
+              "end": 61,
+              "reason": null
+            },
+            "evidence_role": "supports",
+            "explanation": {
+              "en": "The terms state the price from month two.",
+              "ar": "الشروط تذكر السعر اعتبارا من الشهر الثاني."
+            },
+            "from_overall": false
+          }
+        ],
+        "claims_summary": {
+          "overall": "MATCH",
+          "counts": {
+            "MATCH": 2,
+            "CONTRADICTION": 0,
+            "UNKNOWN": 0
+          },
+          "dropped": 0,
+          "omitted_amounts": 0
+        },
+        "decision": {
+          "continue_path": {
+            "key": "continue",
+            "status": "conditional",
+            "reason": null,
+            "horizons": [
+              {
+                "months": 1,
+                "status": "conditional",
+                "total": "7.5",
+                "lines": [
+                  {
+                    "kind": "intro_charge",
+                    "label": null,
+                    "quantity": 1,
+                    "unit_amount": "7.5",
+                    "amount": "7.5",
+                    "source_field": "intro_price"
+                  }
+                ],
+                "missing": []
+              },
+              {
+                "months": 3,
+                "status": "conditional",
+                "total": "37.48",
+                "lines": [
+                  {
+                    "kind": "intro_charge",
+                    "label": null,
+                    "quantity": 1,
+                    "unit_amount": "7.5",
+                    "amount": "7.5",
+                    "source_field": "intro_price"
+                  },
+                  {
+                    "kind": "recurring_charge",
+                    "label": null,
+                    "quantity": 2,
+                    "unit_amount": "14.99",
+                    "amount": "29.98",
+                    "source_field": "recurring_price"
+                  }
+                ],
+                "missing": []
+              },
+              {
+                "months": 12,
+                "status": "conditional",
+                "total": "172.39",
+                "lines": [
+                  {
+                    "kind": "intro_charge",
+                    "label": null,
+                    "quantity": 1,
+                    "unit_amount": "7.5",
+                    "amount": "7.5",
+                    "source_field": "intro_price"
+                  },
+                  {
+                    "kind": "recurring_charge",
+                    "label": null,
+                    "quantity": 11,
+                    "unit_amount": "14.99",
+                    "amount": "164.89",
+                    "source_field": "recurring_price"
+                  }
+                ],
+                "missing": []
+              }
+            ],
+            "assumption_codes": [
+              "horizon",
+              "no_cancel",
+              "intro_one_period"
+            ],
+            "deadline": null
+          },
+          "cancel_path": {
+            "key": "cancel",
+            "status": "unavailable",
+            "reason": "cancellation_terms_not_stated",
+            "horizons": [],
+            "assumption_codes": [],
+            "deadline": null
+          },
+          "difference": []
+        }
+      }
+    }
+  }
+}

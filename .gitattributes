@@ -1,0 +1,8 @@
+# Normalise line endings so Procfile and scripts work on Linux hosts.
+* text=auto eol=lf
+# Benchmark data must stay byte-identical (its SHA-256 is verified by tests and the evaluation runner).
+data/*.csv -text
+*.png binary
+*.ico binary
+*.woff binary
+*.woff2 binary

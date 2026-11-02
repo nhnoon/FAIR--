@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="FAIR (تَبَيَّن) — Know Before You Agree. Compare what you expect from a subscription with what its terms actually say." />
+    <meta name="theme-color" content="#111D35" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>FAIR · تَبَيَّن</title>
+    <script>
+      // Apply the saved theme before first paint (mirrors src/theme/ThemeContext.jsx).
+      try {
+        var p = localStorage.getItem('fair.theme')
+        var dark = p === 'dark' || ((p === null || p === 'system') && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        if (dark) document.documentElement.classList.add('dark')
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
