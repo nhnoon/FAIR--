@@ -4,13 +4,15 @@ FAIR checks what you *believe* about a subscription offer against what its terms
 
 Muse Spark (`muse-spark-1.3`, via the Meta Model API) does the reading. Deterministic code verifies every quote and does every calculation.
 
+**The problem.** Free trials that convert to paid plans, introductory prices that end, cancellation deadlines and add-on fees sit in the fine print. People rarely misread everything. They usually hold one specific wrong belief, such as "I can cancel after the trial and avoid all fees". A summary of the terms does not test that belief. FAIR does.
+
 <p align="center">
   <img src="docs/screenshots/home.png" alt="FAIR home page with a recorded sample result" width="860">
 </p>
 
 ## Watch the demo
 
-**The demo video has not been published yet.** It will be linked here once it is.
+**The demo video (about 3 minutes) has not been published yet.** It will be linked here once it is.
 
 <!-- DEMO VIDEO: replace the line above with the GitHub-hosted video URL on its own line. -->
 
@@ -20,13 +22,13 @@ Muse Spark (`muse-spark-1.3`, via the Meta Model API) does the reading. Determin
 |---|---|---|
 | ![The Check an offer form with terms and an expectation filled in](docs/screenshots/check-an-offer.png) | ![A Contradiction result with the deciding quote and cost summary](docs/screenshots/result-en.png) | ![The same kind of result in Arabic](docs/screenshots/result-ar.png) |
 
-All screenshots come from **replay mode**: real saved Muse Spark outputs, re-checked by FAIR's current code, on synthetic offers. Each one is labelled "Replay mode, not live" in the interface.
+All screenshots come from **replay mode**: real saved Muse Spark outputs, re-checked by FAIR's current code, on synthetic offers. The interface labels each one "Recorded demo · Not live".
 
 ## What FAIR does
 
 - **Splits your belief into claims.** Each claim gets its own verdict: MATCH, CONTRADICTION or UNKNOWN (not settled by the terms).
 - **Shows its evidence.** A decisive verdict needs a quote found word for word in the terms. Otherwise FAIR shows UNKNOWN.
-- **Prices your options.** It compares keeping the subscription with cancelling before the deadline, over 1, 3 and 12 months, using `Decimal` arithmetic on verified values only. Each total is marked as based on stated terms or dependent on assumptions. When the terms are incomplete, FAIR withholds the total and names what is missing.
+- **Prices your options.** It compares keeping the subscription with cancelling before the deadline, over 1, 3 and 12 months, using `Decimal` arithmetic on verified values only. Each total is marked as based on stated terms or dependent on assumptions. When the terms are incomplete, FAIR withholds the total and names what is missing. Cancelling is always shown as a conditional scenario marked **Not confirmed**: FAIR assumes no refund and cannot confirm that cancelling is free.
 - **Keeps uncertainty visible.** Assumptions, rejected values and claims the terms don't settle each have their own section, which opens by default whenever there is something to show.
 - **Works in English and Arabic,** with a full right-to-left interface. Evidence matching tolerates diacritics and Arabic-Indic digits (٥٩ = 59).
 
@@ -78,7 +80,7 @@ python -m venv .venv
 .venv\Scripts\python.exe -m scripts.demo_replay      # http://127.0.0.1:8010
 ```
 
-Open http://127.0.0.1:8010 and choose one of the examples under **Try an example**. Add `?lang=ar` to the address to open the Arabic interface. The example inputs are listed in [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
+Open http://127.0.0.1:8010 on your own machine, choose one of the three examples under **Explore a recorded example**, then press **Reveal the Gap**. Add `?lang=ar` to the address to open the Arabic interface. The example inputs are listed in [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md).
 
 ## Configure the real application locally
 

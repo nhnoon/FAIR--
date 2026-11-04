@@ -60,7 +60,8 @@ const TextArea = forwardRef(function TextArea({ id, label, error, value, onChang
 /** Honest note about availability, with a way forward. Only "live" may mention Muse Spark as the engine. */
 export function AvailabilityNote({ status, onRetry, onOpenExample }) {
   const { t } = useLang()
-  if (status === 'checking') return null
+  // Replay is introduced by the recorded examples themselves (ExamplesList), not by a banner.
+  if (status === 'checking' || status === 'replay') return null
   if (status === 'live') {
     return (
       <p className="text-xs text-muted" data-testid="availability" data-status={status}>
@@ -71,29 +72,39 @@ export function AvailabilityNote({ status, onRetry, onOpenExample }) {
   return (
     <div className="rounded-xl bg-unknown-bg px-4 py-3 text-sm text-unknown-fg" role="status" data-testid="availability" data-status={status}>
       <p>{t(`analyze.unavailable.${status}`)}</p>
-      {status === 'replay' ? null : (
-        <p className="mt-1 flex flex-wrap gap-x-4">
-          {status === 'unreachable' ? (
-            <button type="button" className="inline-flex min-h-[32px] items-center rounded font-medium underline underline-offset-4" onClick={onRetry}>
-              {t('analyze.retryConnection')}
-            </button>
-          ) : null}
-          <button type="button" className="inline-flex min-h-[32px] items-center rounded font-medium underline underline-offset-4" onClick={() => onOpenExample(SAVED_EXAMPLES[0].id)}>
-            {t('analyze.openExample')}
+      <p className="mt-1 flex flex-wrap gap-x-4">
+        {status === 'unreachable' ? (
+          <button type="button" className="inline-flex min-h-[32px] items-center rounded font-medium underline underline-offset-4" onClick={onRetry}>
+            {t('analyze.retryConnection')}
           </button>
-        </p>
-      )}
+        ) : null}
+        <button type="button" className="inline-flex min-h-[32px] items-center rounded font-medium underline underline-offset-4" onClick={() => onOpenExample(SAVED_EXAMPLES[0].id)}>
+          {t('analyze.openExample')}
+        </button>
+      </p>
     </div>
   )
 }
 
-function ExamplesList({ onChoose }) {
+/** In replay mode these are the only inputs that answer, so they lead the page and say so. */
+function ExamplesList({ onChoose, recorded }) {
   const { t, lang } = useLang()
   return (
     <div className="min-w-0" data-testid="examples">
-      <p className="text-sm font-medium text-muted" id="examples-heading">
-        {t('examples.title')}
-      </p>
+      {recorded ? (
+        <>
+          <h2 className="text-base font-semibold text-fg" id="examples-heading">
+            {t('examples.recordedTitle')}
+          </h2>
+          <p className="mt-0.5 text-sm text-muted" role="status" data-testid="availability" data-status="replay">
+            {t('analyze.unavailable.replay')}
+          </p>
+        </>
+      ) : (
+        <p className="text-sm font-medium text-muted" id="examples-heading">
+          {t('examples.title')}
+        </p>
+      )}
       <ul className="mt-2 flex flex-wrap gap-2" aria-labelledby="examples-heading">
         {SAVED_EXAMPLES.map((ex) => (
           <li key={ex.id} className="min-w-0">
@@ -112,6 +123,7 @@ export default function AnalyzeForm({ terms, expectation, onTermsChange, onExpec
   return (
     <div className="space-y-5">
       <AvailabilityNote status={status} onRetry={onRetryConnection} onOpenExample={onOpenExample} />
+      {status === 'replay' ? <ExamplesList recorded onChoose={onChooseExample} /> : null}
       <form
         noValidate
         onSubmit={(e) => {
@@ -140,7 +152,7 @@ export default function AnalyzeForm({ terms, expectation, onTermsChange, onExpec
           ) : null}
         </div>
       </form>
-      <ExamplesList onChoose={onChooseExample} />
+      {status === 'replay' ? null : <ExamplesList onChoose={onChooseExample} />}
     </div>
   )
 }

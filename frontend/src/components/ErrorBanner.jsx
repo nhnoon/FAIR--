@@ -10,7 +10,9 @@ export default function ErrorBanner({ error, onRetry, onDismiss }) {
   const code = lookup(lang, `errors.${error.code}.title`) ? error.code : 'unknown'
   const isConfig = CONFIG_CODES.has(error.code)
   // Nothing went wrong with the user's text in these cases, so they read as a notice and carry no code.
-  const isNotice = isConfig || error.code === 'network'
+  // The same text would fail again in a recorded demo, so it offers no retry either.
+  const demoLimit = error.code === 'replay_unsupported'
+  const isNotice = isConfig || demoLimit || error.code === 'network'
   const tone = isNotice ? 'border-line bg-surface text-fg' : 'border-contra-line bg-contra-bg text-contra-fg'
   const ref = useRef(null)
   // On a phone the banner renders below the form, out of sight of the button that was pressed.
@@ -37,7 +39,7 @@ export default function ErrorBanner({ error, onRetry, onDismiss }) {
             </p>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
-            {onRetry && !isConfig ? (
+            {onRetry && !isConfig && !demoLimit ? (
               <button type="button" className="btn-secondary" onClick={onRetry}>
                 {t('errors.retry')}
               </button>

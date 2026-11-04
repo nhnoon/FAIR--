@@ -592,8 +592,8 @@ describe('replay mode is never presented as live', () => {
   const REPLAY = { ...HEALTH.live, model: 'replay:muse-spark-1.3' }
 
   it.each([
-    ['en', 'Replay mode, not live', 'Recorded synthetic example — replay, not a live model request.', 'no model request was made', 'Live analysis'],
-    ['ar', 'وضع الإعادة، ليس مباشرًا', 'مثال اصطناعي مسجَّل — إعادة عرض، وليس طلبًا مباشرًا إلى النموذج.', 'لم يُرسل أي طلب إلى النموذج', 'تحليل مباشر'],
+    ['en', 'Recorded demo · Not live', 'Recorded example · Not live', 'No model request was made', 'Live analysis'],
+    ['ar', 'عرض مسجَّل · ليس مباشرًا', 'مثال مسجَّل · ليس مباشرًا', 'لم يُرسل أي طلب إلى النموذج', 'تحليل مباشر'],
   ])('labels the status, the note and the result (%s)', async (lang, pill, badge, notice, liveWords) => {
     const user = userEvent.setup()
     const { terms, expectation, body } = replay.cases['FAIR-003']
@@ -801,7 +801,7 @@ describe('truthful system status', () => {
     await user.click(within(screen.getByTestId('availability')).getByRole('button', { name: 'Try again' }))
     await waitFor(() => expect(healthCalls()).toBe(2))
     await user.click(await screen.findByRole('button', { name: 'Open a saved example instead' }))
-    expect(await screen.findByTestId('replay-badge')).toHaveTextContent('Recorded synthetic example')
+    expect(await screen.findByTestId('replay-badge')).toHaveTextContent('Recorded example · Not live')
     expect(screen.getByTestId('replay-notice')).toHaveTextContent('Nothing is running now')
     expect(screen.queryByTestId('live-badge')).not.toBeInTheDocument()
   })
@@ -922,7 +922,7 @@ describe('live analysis → Results workspace', () => {
     expect(verdict).toHaveTextContent('Contradiction')
     expect(verdict).toHaveTextContent('The terms contradict your expectation')
     expect(verdict).toHaveTextContent('It does not stay free.')
-    expect(within(verdict).getByText('AI interpretation')).toBeInTheDocument()
+    expect(within(verdict).queryByText('AI interpretation')).not.toBeInTheDocument() // kept in the detail rows, not the answer
     const mirror = screen.getByRole('region', { name: 'Your expectation vs the terms' })
     const claims = within(mirror).getAllByTestId('claim')
     expect(claims.map((c) => c.dataset.verdict)).toEqual(['MATCH', 'CONTRADICTION'])
@@ -1432,6 +1432,7 @@ describe('home page', () => {
     expect(screen.getByTestId('proof-label')).toHaveTextContent('Recorded sample')
     expect(screen.getByTestId('proof-label')).toHaveTextContent('Not a live analysis')
     const cancel = within(screen.getByTestId('product-proof')).getByTestId('primary-cancel')
+    expect(cancel).toHaveTextContent('Not confirmed')
     expect(cancel).toHaveTextContent('Depends on assumptions')
     expect(cancel).toHaveTextContent('FAIR cannot confirm that cancelling is free')
   })
@@ -1499,6 +1500,7 @@ describe('the answer comes first', () => {
     await show(user, 'decision-twin')
     const cancel = screen.getByTestId('primary-cancel')
     expect(cancel).toHaveTextContent('0.00 USD')
+    expect(cancel).toHaveTextContent('Not confirmed')
     expect(cancel).toHaveTextContent('Depends on assumptions')
     expect(cancel).toHaveTextContent('Only if you meet the deadline')
     expect(screen.getByTestId('primary-keep').querySelector('dd').className).toContain('text-3xl')
@@ -1549,11 +1551,14 @@ describe('demo mode says what it can do', () => {
     const user = userEvent.setup()
     mockFetchWith({ ...HEALTH.live, model: 'replay:muse-spark-1.3' }, fakeResponse(502, { error: { code: 'model_unavailable', message: 'x' } }))
     renderApp()
-    expect(await screen.findByTestId('availability')).toHaveTextContent('only the examples below can be checked')
+    expect(await screen.findByTestId('availability')).toHaveTextContent('This demo answers these three recorded examples')
+    expect(screen.getByRole('heading', { name: 'Explore a recorded example' })).toBeInTheDocument()
     await fillAndSubmit(user, 'Some other offer.', 'A belief.')
     const alert = await screen.findByRole('alert')
-    expect(alert).toHaveTextContent('This demo only checks the examples')
+    expect(alert).toHaveTextContent('This demo checks recorded examples only')
     expect(alert).not.toHaveTextContent('unavailable')
+    expect(alert).not.toHaveTextContent('Error code')
+    expect(within(alert).queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument()
   })
 })
 

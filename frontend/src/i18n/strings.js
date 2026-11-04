@@ -31,7 +31,7 @@ export const STRINGS = {
     },
     status: {
       label: 'System status',
-      replay: 'Replay mode, not live',
+      replay: 'Recorded demo · Not live',
     },
     home: {
       title: "Know what you're agreeing to.",
@@ -50,12 +50,14 @@ export const STRINGS = {
     },
     examples: {
       title: 'Try an example',
+      recordedTitle: 'Explore a recorded example',
     },
     result: {
       costTitle: 'What it could cost',
       keepFor: 'If you keep it for {months}',
       ifCancel: 'If you cancel before the deadline',
       cancelCaveat: 'Only if you meet the deadline. FAIR cannot confirm that cancelling is free.',
+      notConfirmed: 'Not confirmed',
       noTotal: 'No total shown',
       noEstablished: 'These terms do not establish a cost FAIR can calculate.',
       stillOpen: 'The terms do not settle',
@@ -73,7 +75,7 @@ export const STRINGS = {
         not_configured: "Live analysis isn't set up on this server, so no result can be produced yet.",
         disabled: 'Live analysis is turned off on this server, so no result can be produced right now.',
         unreachable: "FAIR can't be reached right now. You can still prepare your text.",
-        replay: 'Demo mode: only the examples below can be checked. Other text returns an error.',
+        replay: 'This demo answers these three recorded examples. Pick one, then press Reveal the Gap.',
       },
       latestResult: 'View latest result',
       retryConnection: 'Try again',
@@ -106,9 +108,9 @@ export const STRINGS = {
       newCheck: 'Check another offer',
     },
     replay: {
-      badge: 'Recorded synthetic example — replay, not a live model request.',
-      savedNotice: 'This whole result was saved earlier. Nothing is running now.',
-      notice: 'FAIR re-ran its checks on a saved answer, and no model request was made.',
+      badge: 'Recorded example · Not live',
+      savedNotice: 'A saved result. Nothing is running now.',
+      notice: 'A saved answer, re-checked by FAIR. No model request was made.',
       earlierPrompt: 'This saved answer came from an earlier prompt, v4. With the current prompt, v5, the model itself answered "not settled" on this case, and the check stays in place as a backstop.',
     },
     reveal: {
@@ -148,8 +150,8 @@ export const STRINGS = {
     },
     errors: {
       replay_unsupported: {
-        title: 'This demo only checks the examples',
-        body: 'Choose one of the examples below the form. Other text cannot be analysed here.',
+        title: 'This demo checks recorded examples only',
+        body: 'Choose one of the three recorded examples above. Your own text can’t be analysed in this demo.',
       },
       code: 'Error code: {code}',
       retry: 'Try again',
@@ -551,7 +553,7 @@ export const STRINGS = {
     },
     status: {
       label: 'حالة النظام',
-      replay: 'وضع الإعادة، ليس مباشرًا',
+      replay: 'عرض مسجَّل · ليس مباشرًا',
     },
     home: {
       title: 'اعرف على ماذا توافق.',
@@ -570,12 +572,14 @@ export const STRINGS = {
     },
     examples: {
       title: 'جرّب مثالًا',
+      recordedTitle: 'استكشف مثالًا مسجَّلًا',
     },
     result: {
       costTitle: 'كم قد يكلفك',
       keepFor: 'إذا احتفظت به لمدة {months}',
       ifCancel: 'إذا ألغيت قبل الموعد النهائي',
       cancelCaveat: 'بشرط الالتزام بالموعد. لا يستطيع FAIR تأكيد أن الإلغاء مجاني.',
+      notConfirmed: 'غير مؤكَّد',
       noTotal: 'لا يوجد إجمالي',
       noEstablished: 'لا تحدد هذه الشروط تكلفة يمكن لـ FAIR حسابها.',
       stillOpen: 'لا تحسم الشروط',
@@ -593,7 +597,7 @@ export const STRINGS = {
         not_configured: 'التحليل المباشر غير مُعدّ على هذا الخادم، لذا لا يمكن إصدار نتيجة بعد.',
         disabled: 'التحليل المباشر متوقف على هذا الخادم، لذا لا يمكن إصدار نتيجة حاليًا.',
         unreachable: 'تعذّر الوصول إلى FAIR حاليًا. يمكنك مواصلة تجهيز نصك.',
-        replay: 'وضع العرض: يمكن فحص الأمثلة أدناه فقط، ويعيد أي نص آخر رسالة خطأ.',
+        replay: 'يجيب هذا العرض عن هذه الأمثلة المسجَّلة الثلاثة. اختر واحدًا، ثم اضغط «اكشف الفجوة».',
       },
       latestResult: 'عرض أحدث نتيجة',
       retryConnection: 'حاول مجددًا',
@@ -626,9 +630,9 @@ export const STRINGS = {
       newCheck: 'افحص عرضًا آخر',
     },
     replay: {
-      badge: 'مثال اصطناعي مسجَّل — إعادة عرض، وليس طلبًا مباشرًا إلى النموذج.',
-      savedNotice: 'حُفظت هذه النتيجة كاملة سابقًا. لا يجري أي شيء الآن.',
-      notice: 'أعاد FAIR فحوصه على إجابة محفوظة، ولم يُرسل أي طلب إلى النموذج.',
+      badge: 'مثال مسجَّل · ليس مباشرًا',
+      savedNotice: 'نتيجة محفوظة. لا يجري أي شيء الآن.',
+      notice: 'إجابة محفوظة أعاد FAIR فحصها، ولم يُرسل أي طلب إلى النموذج.',
       earlierPrompt: 'جاءت هذه الإجابة المحفوظة من إصدار أقدم من التعليمات (v4). ومع الإصدار الحالي (v5) أجاب النموذج نفسه بأن الأمر «غير محسوم» في هذه الحالة، ويبقى الفحص قائمًا كخط دفاع احتياطي.',
     },
     reveal: {
@@ -668,8 +672,8 @@ export const STRINGS = {
     },
     errors: {
       replay_unsupported: {
-        title: 'يفحص هذا العرض الأمثلة فقط',
-        body: 'اختر أحد الأمثلة أسفل النموذج. لا يمكن تحليل أي نص آخر هنا.',
+        title: 'يفحص هذا العرض الأمثلة المسجَّلة فقط',
+        body: 'اختر أحد الأمثلة المسجَّلة الثلاثة أعلاه. لا يمكن تحليل نصك الخاص في هذا العرض.',
       },
       code: 'رمز الخطأ: {code}',
       retry: 'حاول مجددًا',

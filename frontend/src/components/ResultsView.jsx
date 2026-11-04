@@ -25,14 +25,18 @@ function ModeLine({ result }) {
       </div>
     )
   }
+  // One line, attached to this result: a recorded answer must never read as a new live one.
   if (isReplayModel(data.model)) {
     return (
-      <div className="rounded-xl bg-unknown-bg px-4 py-2.5 text-sm text-unknown-fg">
-        <p className="font-semibold" data-testid="replay-badge">{t('replay.badge')}</p>
-        <p data-testid="replay-notice">
-          {t(result.kind === 'saved' ? 'replay.savedNotice' : 'replay.notice')}
-          {isEarlierPromptReplay(data.model) ? <span className="mt-1 block font-medium" data-testid="earlier-prompt-notice">{t('replay.earlierPrompt')}</span> : null}
+      <div className="text-xs text-muted">
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="chip whitespace-nowrap font-medium text-unknown-fg" data-testid="replay-badge">
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-unknown-solid" />
+            {t('replay.badge')}
+          </span>
+          <span data-testid="replay-notice">{t(result.kind === 'saved' ? 'replay.savedNotice' : 'replay.notice')}</span>
         </p>
+        {isEarlierPromptReplay(data.model) ? <p className="mt-2 text-sm font-medium text-unknown-fg" data-testid="earlier-prompt-notice">{t('replay.earlierPrompt')}</p> : null}
       </div>
     )
   }

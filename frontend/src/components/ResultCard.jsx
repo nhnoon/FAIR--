@@ -58,12 +58,16 @@ function CostSummary({ data }) {
         </div>
       ) : null}
       {cancel ? (
-        <div className="border-t border-line pt-3 text-sm" data-testid="primary-cancel">
-          <dt className="text-muted">{t('result.ifCancel')}</dt>
-          <dd className="mt-0.5 text-fg">
-            <bdi className="font-medium">{money(cancel.total)}</bdi> · {t('cost.status.conditional')}
+        // A scenario, not a promise: the condition and the doubt sit with the amount, in the same tinted box.
+        <div className="rounded-xl border border-unknown-line bg-unknown-bg p-3 text-sm text-unknown-fg" data-testid="primary-cancel">
+          <dt className="flex items-center gap-1.5 font-medium">
+            <QuestionIcon width={14} height={14} className="shrink-0" />
+            {t('result.ifCancel')}
+          </dt>
+          <dd className="mt-1">
+            <bdi className="font-semibold">{money(cancel.total)}</bdi> · <span className="font-semibold">{t('result.notConfirmed')}</span> · {t('cost.status.conditional')}
           </dd>
-          <dd className="mt-0.5 text-xs text-muted">{t('result.cancelCaveat')}</dd>
+          <dd className="mt-1">{t('result.cancelCaveat')}</dd>
         </div>
       ) : null}
     </dl>
@@ -93,7 +97,6 @@ export default function ResultCard({ data, expectation, compact, onShowEvidence,
             <p className="mt-2 max-w-2xl break-words text-[17px] leading-relaxed text-fg" lang={lang}>
               {data.explanation[lang]}
             </p>
-            <p className="mt-1 text-xs text-muted">{t('provenance.ai')}</p>
           </>
         )}
 
