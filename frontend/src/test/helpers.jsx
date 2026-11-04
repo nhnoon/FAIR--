@@ -54,7 +54,9 @@ export function mockFetch(...responses) {
 
 export const analyzeCalls = (fn) => fn.mock.calls.filter(([url]) => String(url).endsWith('/api/analyze'))
 
-export function renderApp(lang = 'en') {
+// The app opens on the home page; most tests start on the form, which is what the hash says here.
+export function renderApp(lang = 'en', hash = '#/analyze') {
+  if (!window.location.hash) window.history.replaceState(null, '', hash)
   return render(
     <ThemeProvider>
       <LanguageProvider initialLang={lang}>

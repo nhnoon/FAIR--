@@ -1,33 +1,19 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useLang } from '../i18n/LanguageContext.jsx'
 import { THEMES, useTheme } from '../theme/ThemeContext.jsx'
-import { FairMark, GlobeIcon, InfoIcon, ListIcon, MenuIcon, MonitorIcon, MoonIcon, SearchIcon, SunIcon, XIcon } from './icons.jsx'
+import { FairMark, MonitorIcon, MoonIcon, SunIcon } from './icons.jsx'
 
-export const VIEWS = ['analyze', 'results', 'about']
-const NAV_ICONS = { analyze: SearchIcon, results: ListIcon, about: InfoIcon }
+export const VIEWS = ['home', 'analyze', 'results', 'about']
 const THEME_ICONS = { light: SunIcon, dark: MoonIcon, system: MonitorIcon }
 
-// System status uses neutral surfaces; only the dot carries a status colour.
-const STATUS_DOT = {
-  checking: 'bg-muted',
-  live: 'bg-match-solid',
-  replay: 'bg-unknown-solid',
-  not_configured: 'bg-unknown-solid',
-  disabled: 'bg-unknown-solid',
-  unreachable: 'bg-contra-solid',
-}
-
+// The top bar names one state only: a replay must never pass for a live product.
+// Every other state is a note under the form (AvailabilityNote).
 export function StatusPill({ status }) {
   const { t } = useLang()
+  if (status !== 'replay') return null
   return (
-    <span
-      className="chip whitespace-nowrap bg-subtle text-fg ring-line"
-      data-testid="status-pill"
-      data-status={status}
-      role="status"
-      aria-label={`${t('status.label')}: ${t(`status.${status}`)}`}
-    >
-      <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${STATUS_DOT[status]}`} />
+    <span className="chip whitespace-nowrap text-muted" data-testid="status-pill" data-status={status} role="status" aria-label={`${t('status.label')}: ${t(`status.${status}`)}`}>
+      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-unknown-solid" />
       {t(`status.${status}`)}
     </span>
   )
@@ -37,7 +23,7 @@ export function ThemeControl() {
   const { t } = useLang()
   const { preference, setPreference } = useTheme()
   return (
-    <div role="group" aria-label={t('theme.label')} className="inline-flex shrink-0 rounded-full border border-line bg-surface p-0.5" data-testid="theme-control">
+    <div role="group" aria-label={t('theme.label')} className="inline-flex shrink-0 rounded-lg bg-subtle p-0.5" data-testid="theme-control">
       {THEMES.map((m) => {
         const Icon = THEME_ICONS[m]
         const active = preference === m
@@ -49,9 +35,7 @@ export function ThemeControl() {
             aria-pressed={active}
             aria-label={t(`theme.${m}`)}
             title={t(`theme.${m}`)}
-            className={`grid h-8 w-8 place-items-center rounded-full transition-colors ${
-              active ? 'bg-primary text-primary-fg' : 'text-muted hover:bg-subtle hover:text-fg'
-            }`}
+            className={`grid h-8 w-8 place-items-center rounded-md transition-colors ${active ? 'bg-surface text-fg shadow-soft' : 'text-muted hover:text-fg'}`}
           >
             <Icon width={15} height={15} />
           </button>
@@ -61,154 +45,52 @@ export function ThemeControl() {
   )
 }
 
-function Brand() {
+function Brand({ onHome, footer }) {
   const { t } = useLang()
   return (
-    <div className="flex items-center gap-3 px-2">
-      <FairMark size={34} />
-      <div className="min-w-0 leading-tight">
-        <p className="flex items-baseline gap-1.5">
-          <span className="font-bold tracking-[0.06em] text-sidebar-fg">{t('brand.name')}</span>
-          <span aria-hidden="true" className="text-sidebar-muted">|</span>
-          <span lang="ar" className="font-arabic font-semibold text-sidebar-fg">
-            {t('brand.arabicName')}
-          </span>
-        </p>
-        <p className="truncate text-xs text-sidebar-muted">{t('brand.tagline')}</p>
-      </div>
-    </div>
+    <button type="button" onClick={onHome} className="inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg" aria-label={t('nav.home')} data-testid={footer ? undefined : 'brand-home'}>
+      <FairMark size={26} />
+      <span className="text-[17px] font-bold tracking-tight text-fg">{t('brand.name')}</span>
+      <span lang="ar" className="font-arabic text-sm text-muted">
+        {t('brand.arabicName')}
+      </span>
+    </button>
   )
 }
 
-function NavList({ view, onNavigate, hasResult, firstRef }) {
-  const { t } = useLang()
-  return (
-    <ul className="space-y-1">
-      {VIEWS.map((v, i) => {
-        const Icon = NAV_ICONS[v]
-        const locked = v === 'results' && !hasResult
-        const current = view === v
-        return (
-          <li key={v}>
-            <button
-              ref={i === 0 ? firstRef : undefined}
-              type="button"
-              onClick={() => !locked && onNavigate(v)}
-              aria-current={current ? 'page' : undefined}
-              aria-disabled={locked ? 'true' : undefined}
-              title={locked ? t('nav.resultsLocked') : undefined}
-              className={`flex min-h-[44px] w-full items-center gap-3 rounded-xl px-3 text-start text-sm font-medium transition-colors ${
-                current
-                  ? 'bg-sidebar-active text-sidebar-fg ring-1 ring-sidebar-fg/15'
-                  : locked
-                    ? 'cursor-not-allowed text-sidebar-muted/70'
-                    : 'text-sidebar-muted hover:bg-sidebar-active/60 hover:text-sidebar-fg'
-              }`}
-            >
-              <Icon width={18} height={18} className="shrink-0" />
-              <span className="flex-1 py-1.5">
-                <span className="block">{t(`nav.${v}`)}</span>
-                {locked ? <span className="block text-[11px] font-normal leading-snug">{t('nav.resultsLocked')}</span> : null}
-              </span>
-            </button>
-          </li>
-        )
-      })}
-    </ul>
-  )
-}
-
-function SidebarBody({ view, onNavigate, hasResult, firstRef }) {
-  const { t } = useLang()
-  return (
-    <div className="flex h-full flex-col gap-8 border-e border-sidebar-fg/10 bg-sidebar px-3 py-5">
-      <Brand />
-      <nav aria-label={t('nav.label')} className="flex-1">
-        <NavList view={view} onNavigate={onNavigate} hasResult={hasResult} firstRef={firstRef} />
-      </nav>
-      <p className="px-2 text-xs leading-relaxed text-sidebar-muted">{t('nav.disclaimer')}</p>
-    </div>
-  )
-}
-
-function MobileDrawer({ open, onClose, menuButtonRef, ...navProps }) {
-  const { t } = useLang()
-  const panelRef = useRef(null)
-  const firstRef = useRef(null)
-  const onCloseRef = useRef(onClose)
-  onCloseRef.current = onClose
-
-  // Depends on `open` only, so re-renders never move focus while the drawer is open.
-  useEffect(() => {
-    if (!open) return
-    firstRef.current?.focus()
-    const menuButton = menuButtonRef.current
-    const onKey = (e) => {
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        onCloseRef.current()
-        return
-      }
-      if (e.key !== 'Tab') return
-      const nodes = panelRef.current?.querySelectorAll('button:not([disabled])')
-      if (!nodes?.length) return
-      const first = nodes[0]
-      const last = nodes[nodes.length - 1]
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault()
-        first.focus()
-      }
-    }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('keydown', onKey)
-      menuButton?.focus()
-    }
-  }, [open, menuButtonRef])
-
-  if (!open) return null
-  return (
-    <div className="fixed inset-0 z-40 lg:hidden">
-      <div className="absolute inset-0 bg-bg/70" aria-hidden="true" onClick={onClose} />
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={t('nav.label')}
-        className="absolute inset-y-0 start-0 flex w-72 max-w-[85vw] flex-col shadow-lift"
-      >
-        <SidebarBody
-          {...navProps}
-          firstRef={firstRef}
-          onNavigate={(v) => {
-            navProps.onNavigate(v)
-            onClose()
-          }}
-        />
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('nav.close')}
-          className="absolute end-2 top-4 grid h-10 w-10 place-items-center rounded-lg text-sidebar-muted hover:bg-sidebar-active hover:text-sidebar-fg"
-        >
-          <XIcon width={18} height={18} />
-        </button>
-      </div>
-    </div>
-  )
-}
-
-export default function AppShell({ view, onNavigate, hasResult, status, drawerOpen, setDrawerOpen, children }) {
+function LanguageButton() {
   const { t, setLang } = useLang()
-  const menuButtonRef = useRef(null)
   const target = t('lang.switchToLang')
+  return (
+    <button type="button" onClick={() => setLang(target)} aria-label={t('lang.switchAria')} className="inline-flex min-h-[40px] shrink-0 items-center rounded-lg px-2.5 text-sm font-medium text-fg hover:bg-subtle">
+      <span lang={target}>{t('lang.switchTo')}</span>
+    </button>
+  )
+}
+
+export function Footer({ onNavigate }) {
+  const { t } = useLang()
+  return (
+    <footer className="border-t border-line bg-surface">
+      <div className="page flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-5">
+        <p className="min-w-0 text-xs text-muted">{t('nav.disclaimer')}</p>
+        <div className="flex items-center gap-4">
+          <button type="button" className="inline-flex min-h-[40px] items-center rounded text-sm font-medium text-fg underline-offset-4 hover:underline" onClick={() => onNavigate('about')}>
+            {t('nav.about')}
+          </button>
+          <ThemeControl />
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+export default function AppShell({ view, onNavigate, hasResult, status, children }) {
+  const { t } = useLang()
   const mainRef = useRef(null)
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="flex min-h-screen flex-col bg-bg">
       <a
         href="#workspace"
         onClick={(e) => {
@@ -220,57 +102,37 @@ export default function AppShell({ view, onNavigate, hasResult, status, drawerOp
         {t('nav.skip')}
       </a>
 
-      {/* Desktop sidebar: left in English, mirrored to the right in Arabic via logical `start`. */}
-      <aside className="fixed inset-y-0 start-0 z-30 hidden w-64 lg:block" data-testid="sidebar">
-        <SidebarBody view={view} onNavigate={onNavigate} hasResult={hasResult} />
-      </aside>
-
-      <MobileDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        menuButtonRef={menuButtonRef}
-        view={view}
-        onNavigate={onNavigate}
-        hasResult={hasResult}
-      />
-
-      <div className="lg:ps-64">
-        <header className="sticky top-0 z-20 border-b border-line bg-surface">
-          {/* One status pill: inline on wider screens, wrapped onto its own row on phones. */}
-          <div className="mx-auto flex min-h-[56px] max-w-5xl flex-wrap items-center gap-x-2 gap-y-1.5 px-4 py-2 sm:flex-nowrap sm:gap-x-3 sm:px-6">
-            <button
-              ref={menuButtonRef}
-              type="button"
-              onClick={() => setDrawerOpen(true)}
-              aria-label={t('nav.open')}
-              aria-expanded={drawerOpen}
-              className="-ms-2 grid h-10 w-10 place-items-center rounded-lg text-fg hover:bg-subtle lg:hidden"
-            >
-              <MenuIcon width={20} height={20} />
-            </button>
-            <p className="min-w-0 flex-1 truncate text-sm font-semibold text-fg" data-testid="workspace-title">
-              {t(`nav.${view}`)}
-            </p>
+      <header className="sticky top-0 z-20 border-b border-line bg-surface">
+        <div className="page flex min-h-[64px] flex-wrap items-center gap-x-3 gap-y-1 py-2 sm:gap-x-4">
+          <Brand onHome={() => onNavigate('home')} />
+          <p className="sr-only" data-testid="workspace-title">
+            {t(`nav.${view}`)}
+          </p>
+          {status === 'replay' ? (
             <span className="order-last w-full sm:order-none sm:w-auto">
               <StatusPill status={status} />
             </span>
-            <ThemeControl />
-            <button
-              type="button"
-              onClick={() => setLang(target)}
-              aria-label={t('lang.switchAria')}
-              className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-sm font-semibold text-fg hover:bg-subtle"
-            >
-              <GlobeIcon width={15} height={15} />
-              <span lang={target}>{t('lang.switchTo')}</span>
+          ) : null}
+          <span className="flex-1" />
+          <nav aria-label={t('nav.label')} className="flex items-center gap-1 sm:gap-2" data-testid="primary-nav">
+            {hasResult && view !== 'results' ? (
+              <button type="button" onClick={() => onNavigate('results')} className="hidden min-h-[40px] items-center rounded-lg px-2.5 text-sm font-medium text-fg hover:bg-subtle sm:inline-flex">
+                {t('nav.results')}
+              </button>
+            ) : null}
+            {view === 'results' && hasResult ? <span className="sr-only" aria-current="page">{t('nav.results')}</span> : null}
+            <LanguageButton />
+            <button type="button" onClick={() => onNavigate('analyze')} aria-current={view === 'analyze' ? 'page' : undefined} className="btn-primary min-h-[40px] whitespace-nowrap px-3.5">
+              {t('nav.analyze')}
             </button>
-          </div>
-        </header>
+          </nav>
+        </div>
+      </header>
 
-        <main id="workspace" ref={mainRef} tabIndex={-1} className="mx-auto max-w-5xl px-4 py-6 focus:outline-none sm:px-6 sm:py-8">
-          {children}
-        </main>
-      </div>
+      <main id="workspace" ref={mainRef} tabIndex={-1} className="flex w-full flex-1 flex-col focus:outline-none">
+        <div className="flex-1">{children}</div>
+      </main>
+      <Footer onNavigate={onNavigate} />
     </div>
   )
 }

@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { useLang } from '../i18n/LanguageContext.jsx'
 import { collectEvidence, factEvidenceId, sourceFieldEvidenceId } from '../lib/evidence.js'
 import { formatMoney, quote } from '../lib/format.js'
+import Chapter from './Chapter.jsx'
 import { assumptionText } from './FutureReceipt.jsx'
 import { ProvenanceTag } from './Provenance.jsx'
-import { QuoteIcon } from './icons.jsx'
 
 const LONG_HORIZON = 12
 
@@ -36,8 +36,8 @@ export function buildChoices(decision) {
 function Ledger({ title, kind, testId, children }) {
   return (
     <div className="min-w-0" data-testid={testId}>
-      <div className="flex flex-wrap items-center gap-2">
-        <h3 className="text-sm font-semibold text-fg">{title}</h3>
+      <h3 className="text-sm font-medium text-fg">{title}</h3>
+      <div className="mt-0.5 sr-only">
         <ProvenanceTag kind={kind} />
       </div>
       <ul className="mt-2 space-y-2 text-sm text-fg">{children}</ul>
@@ -47,6 +47,10 @@ function Ledger({ title, kind, testId, children }) {
 
 // Shown only with a verified contradiction and at least two priced choices. It does not claim that the
 // contradicted sentence caused the amounts: it sets the belief beside what each choice costs under the terms.
+export function canReveal(data) {
+  return !!(data.claims || []).find((c) => c.verdict === 'CONTRADICTION' && !c.downgraded && c.evidence?.verified) && buildChoices(data.decision).length >= 2
+}
+
 export default function DecisionReveal({ data, onShowEvidence }) {
   const { t, lang } = useLang()
   const choices = useMemo(() => buildChoices(data.decision), [data.decision])
@@ -65,35 +69,11 @@ export default function DecisionReveal({ data, onShowEvidence }) {
   const unsettled = (data.claims || []).filter((c) => c.verdict === 'UNKNOWN')
 
   return (
-    <section aria-labelledby="reveal-heading" className="card p-5 sm:p-6" data-testid="decision-reveal">
-      <h2 id="reveal-heading" className="section-title">
-        {t('reveal.title')}
-      </h2>
-      <p className="mt-0.5 text-sm text-muted">{t('reveal.subtitle')}</p>
-
-      <div className="mt-4 grid gap-3 md:grid-cols-2">
-        <div className="min-w-0 rounded-xl bg-subtle p-4" data-testid="reveal-belief">
-          <p className="text-xs font-semibold text-muted">{t('reveal.believed')}</p>
-          <p dir="auto" className="mt-1 break-words font-semibold text-fg">
-            {quote(claim.text, lang)}
-          </p>
-        </div>
-        <div className="min-w-0 rounded-xl border border-contra-line bg-contra-bg p-4" data-testid="reveal-terms">
-          <p className="text-xs font-semibold text-contra-fg">{t('reveal.termsSay')}</p>
-          <p dir="auto" className="mt-1 break-words font-semibold text-fg">
-            {quote(claim.evidence.quote, lang)}
-          </p>
-          <button type="button" className="text-link-btn mt-1" onClick={() => onShowEvidence(claim.id)}>
-            <QuoteIcon width={13} height={13} />
-            {t('reveal.seeQuote')}
-          </button>
-        </div>
-      </div>
-
-      <h3 className="mt-5 text-sm font-semibold text-fg" id="reveal-choices">
+    <Chapter id="reveal-heading" title={t('reveal.title')} testId="decision-reveal">
+      <h3 className="text-sm font-medium text-fg" id="reveal-choices">
         {t('reveal.question')}
       </h3>
-      <div role="group" aria-labelledby="reveal-choices" className={`mt-2 grid gap-3 ${choices.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+      <div role="group" aria-labelledby="reveal-choices" className={`mt-3 grid gap-3 ${choices.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
         {choices.map((c) => (
           <button
             key={c.key}
@@ -101,14 +81,14 @@ export default function DecisionReveal({ data, onShowEvidence }) {
             aria-pressed={choice.key === c.key}
             onClick={() => setSelected(c.key)}
             data-testid={`reveal-choice-${c.key}`}
-            className={`min-w-0 rounded-xl border p-4 text-start transition-colors ${choice.key === c.key ? 'border-focus bg-mark ring-1 ring-focus' : 'border-line bg-surface hover:bg-subtle'}`}
+            className={`min-w-0 rounded-2xl border p-4 text-start transition-colors ${choice.key === c.key ? 'border-focus bg-mark ring-1 ring-focus' : 'border-line hover:bg-subtle'}`}
           >
-            <span className="block text-sm font-semibold text-fg">{t(`reveal.choices.${c.key}.label`)}</span>
-            <span className="mt-1 block text-xs text-muted">{t(`reveal.choices.${c.key}.period`)}</span>
-            <bdi className="mt-2 block text-xl font-bold tabular-nums text-fg" data-testid={`reveal-amount-${c.key}`}>
+            <span className="block text-sm font-medium">{t(`reveal.choices.${c.key}.label`)}</span>
+            <span className="mt-0.5 block text-xs text-muted">{t(`reveal.choices.${c.key}.period`)}</span>
+            <bdi className="mt-2 block text-lg font-semibold tabular-nums" data-testid={`reveal-amount-${c.key}`}>
               {c.key === 'miss' ? t('reveal.atLeast', { amount: money(c.amount) }) : money(c.amount)}
             </bdi>
-            <span className="mt-1 block text-xs font-medium text-muted">{t(`cost.status.${c.status}`)}</span>
+            <span className={`mt-1 block text-xs font-medium ${c.status === 'conditional' ? 'text-unknown-fg' : 'text-muted'}`}>{t(`cost.status.${c.status}`)}</span>
           </button>
         ))}
       </div>
@@ -116,7 +96,7 @@ export default function DecisionReveal({ data, onShowEvidence }) {
         <ProvenanceTag kind="calc" />
       </div>
 
-      <div className="mt-5 grid gap-5 border-t border-line pt-4 md:grid-cols-3" aria-live="polite">
+      <div className="mt-6 grid gap-6 md:grid-cols-3" aria-live="polite">
         <Ledger title={t('reveal.verified')} kind="terms" testId="reveal-verified">
           {quotes.map((it) => (
             <li key={it.id} className="min-w-0">
@@ -124,7 +104,6 @@ export default function DecisionReveal({ data, onShowEvidence }) {
                 {quote(it.evidence.quote, lang)}
               </p>
               <button type="button" className="text-link-btn mt-0.5 flex" onClick={() => onShowEvidence(it.id)}>
-                <QuoteIcon width={12} height={12} />
                 {t('reveal.seeQuote')}
               </button>
             </li>
@@ -146,6 +125,6 @@ export default function DecisionReveal({ data, onShowEvidence }) {
           {choice.key !== 'miss' && !unsettled.length ? <li className="text-muted">{t('reveal.noUnknown')}</li> : null}
         </Ledger>
       </div>
-    </section>
+    </Chapter>
   )
 }

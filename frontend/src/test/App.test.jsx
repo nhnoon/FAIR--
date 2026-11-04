@@ -1,13 +1,16 @@
-import { act, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import App from '../App.jsx'
+import { LanguageProvider } from '../i18n/LanguageContext.jsx'
+import { ThemeProvider } from '../theme/ThemeContext.jsx'
 import withheldCases from './fixtures/financial_withheld.json'
 import replay from './fixtures/phase11_replay.json'
 import { HEALTH, analyzeCalls, fakeResponse, liveResponse, mockFetch, mockFetchWith, renderApp } from './helpers.jsx'
 
 const ANALYZE = 'Reveal the Gap'
 const horizon = (name) => within(screen.getByTestId('horizon-switch')).getByRole('button', { name })
-const nav = (name) => within(screen.getByTestId('sidebar')).getByRole('button', { name: new RegExp(`^${name}`) })
+const nav = (name) => screen.getAllByRole('button', { name: new RegExp(`^${name}`) })[0]
 
 // Users paste offer terms; pasting also keeps tests fast.
 async function fillAndSubmit(user, terms, expectation) {
@@ -170,11 +173,9 @@ describe('Decision reveal: belief beside the cost of each choice', () => {
     await screen.findByTestId('live-badge')
   }
 
-  it('puts the contradicted belief beside the verified sentence and three backend-priced choices', async () => {
+  it('prices three choices from the backend, without repeating the belief or the quote', async () => {
     const user = userEvent.setup()
     await showBody(user, liveResponse('decision-twin'))
-    expect(screen.getByTestId('reveal-belief')).toHaveTextContent('The subscription ends automatically.')
-    expect(screen.getByTestId('reveal-terms')).toHaveTextContent('renews automatically at USD 9.99 per month')
     expect(screen.getByTestId('reveal-amount-keep')).toHaveTextContent('119.88 USD')
     expect(screen.getByTestId('reveal-amount-cancel')).toHaveTextContent('0.00 USD')
     expect(screen.getByTestId('reveal-amount-miss')).toHaveTextContent('At least 9.99 USD')
@@ -262,13 +263,108 @@ describe('Decision reveal: belief beside the cost of each choice', () => {
   it('works in Arabic with the same backend amounts', async () => {
     const user = userEvent.setup()
     await showBody(user, liveResponse('decision-twin'), 'ar')
-    const reveal = screen.getByRole('region', { name: 'توقعك، وتكلفة كل خيار' })
-    expect(reveal).toHaveTextContent('كنت تعتقد')
+    const reveal = screen.getByRole('region', { name: 'خياراتك' })
     expect(screen.getByTestId('reveal-amount-keep')).toHaveTextContent('119.88 USD')
     expect(screen.getByTestId('reveal-amount-miss')).toHaveTextContent('9.99 USD على الأقل')
     await user.click(screen.getByTestId('reveal-choice-miss'))
     expect(screen.getByTestId('reveal-unknown')).toHaveTextContent('هل يوقف الإلغاء بعد الموعد')
     expect(reveal.textContent).not.toMatch(/reveal\.|cost\.status|undefined/)
+  })
+})
+
+describe('What FAIR checked', () => {
+  const claim = { id: 'claim-1', text: 'The price will never change.', topic: 'price', verdict: 'UNKNOWN', model_verdict: 'MATCH', downgraded: true, reason: 'absolute_claim_unsupported', evidence: null, explanation: { en: 'x', ar: 'س' } }
+
+  async function show(user, { terms, expectation, body }, lang = 'en') {
+    mockFetch(fakeResponse(200, body))
+    renderApp(lang)
+    const [a, b, go] = lang === 'en' ? ['Subscription terms', 'Your expectation', ANALYZE] : ['شروط الاشتراك', 'توقعك', 'اكشف الفجوة']
+    await user.click(screen.getByLabelText(a))
+    await user.paste(terms)
+    await user.click(screen.getByLabelText(b))
+    await user.paste(expectation)
+    await user.click(screen.getByRole('button', { name: go }))
+    return screen.findByTestId('trust-audit')
+  }
+
+  it('shows the model answer beside the one FAIR shows, with the reason', async () => {
+    const user = userEvent.setup()
+    const live = liveResponse('decision-twin')
+    const body = { ...live.body, verdict: 'MATCH', model_verdict: 'MATCH', verdict_downgraded: false, claims: [claim], claims_summary: { ...live.body.claims_summary, overall: 'UNKNOWN' } }
+    const audit = await show(user, { ...live, body })
+    expect(audit).toHaveAttribute('data-changed', 'true')
+    const changed = within(audit).getByTestId('audit-changed')
+    expect(changed).toHaveTextContent('Muse Spark answered')
+    expect(changed).toHaveTextContent('Matches')
+    expect(changed).toHaveTextContent('Not settled')
+    expect(changed).toHaveTextContent('The cited sentence does not make this promise')
+    expect(within(audit).queryByTestId('audit-unchanged')).not.toBeInTheDocument()
+    expect(within(audit).queryByTestId('audit-historical')).not.toBeInTheDocument()
+  })
+
+  it('keeps the historical label beside an earlier-prompt answer', async () => {
+    const user = userEvent.setup()
+    const live = liveResponse('decision-twin')
+    const body = { ...live.body, model: 'replay:muse-spark-1.3:prompt-v4', verdict: 'MATCH', model_verdict: 'MATCH', verdict_downgraded: false, claims: [claim], claims_summary: { ...live.body.claims_summary, overall: 'UNKNOWN' } }
+    const audit = await show(user, { ...live, body })
+    expect(within(within(audit).getByTestId('audit-changed')).getByTestId('audit-historical')).toHaveTextContent('earlier prompt v4, not the current prompt')
+  })
+
+  it('says plainly when the checks changed nothing', async () => {
+    const user = userEvent.setup()
+    const live = liveResponse('decision-twin')
+    const overall = live.body.claims_summary.overall
+    const audit = await show(user, { ...live, body: { ...live.body, verdict: overall, model_verdict: overall } })
+    expect(audit).toHaveAttribute('data-changed', 'false')
+    expect(within(audit).getByTestId('audit-unchanged')).toHaveTextContent("did not change the model's answer")
+    expect(within(audit).getByTestId('audit-money')).toHaveTextContent('calculated by code')
+    expect(within(audit).queryByTestId('audit-changed')).not.toBeInTheDocument()
+  })
+
+  it('reports a withheld total, in English and Arabic, with no zero', async () => {
+    const user = userEvent.setup()
+    const { vat_en: en, vat_ar: ar } = withheldCases.percent_cases
+    const audit = await show(user, en)
+    expect(within(audit).getByTestId('audit-money')).toHaveTextContent('withheld the total')
+    expect(Number(within(audit).getByTestId('audit-count-unknown').querySelector('p').textContent)).toBeGreaterThan(0)
+    cleanup()
+    const auditAr = await show(user, ar, 'ar')
+    expect(within(auditAr).getByTestId('audit-money')).toHaveTextContent('حجب FAIR الإجمالي')
+    expect(document.body.textContent).not.toMatch(/audit\.|mirror\.verdict/)
+  })
+
+  it('counts verified passages, assumptions and unknowns from the response', async () => {
+    const user = userEvent.setup()
+    const live = liveResponse('decision-twin')
+    const audit = await show(user, live)
+    const codes = new Set([...live.body.decision.continue_path.assumption_codes, ...live.body.decision.cancel_path.assumption_codes])
+    expect(within(audit).getByTestId('audit-count-assumption')).toHaveTextContent(String(codes.size))
+    expect(within(audit).getByTestId('audit-count-terms').querySelector('p').textContent).not.toBe('0')
+  })
+
+  it('labels an earlier-prompt replay, and only that replay', async () => {
+    const user = userEvent.setup()
+    const live = liveResponse('decision-twin')
+    mockFetchWith({ ...HEALTH.live, model: 'replay:muse-spark-1.3:prompt-v4' }, fakeResponse(200, { ...live.body, model: 'replay:muse-spark-1.3:prompt-v4' }))
+    renderApp('en')
+    await user.click(screen.getByLabelText('Subscription terms'))
+    await user.paste(live.terms)
+    await user.click(screen.getByLabelText('Your expectation'))
+    await user.paste(live.expectation)
+    await user.click(screen.getByRole('button', { name: ANALYZE }))
+    expect(await screen.findByTestId('earlier-prompt-notice')).toHaveTextContent('earlier prompt, v4')
+    expect(screen.queryByTestId('audit-historical')).not.toBeInTheDocument() // no change to qualify on this answer
+    expect(screen.getByTestId('replay-badge')).toBeInTheDocument()
+    cleanup()
+    mockFetchWith({ ...HEALTH.live, model: 'replay:muse-spark-1.3' }, fakeResponse(200, { ...live.body, model: 'replay:muse-spark-1.3' }))
+    renderApp('en')
+    await user.click(screen.getByLabelText('Subscription terms'))
+    await user.paste(live.terms)
+    await user.click(screen.getByLabelText('Your expectation'))
+    await user.paste(live.expectation)
+    await user.click(screen.getByRole('button', { name: ANALYZE }))
+    await screen.findByTestId('replay-notice')
+    expect(screen.queryByTestId('earlier-prompt-notice')).not.toBeInTheDocument()
   })
 })
 
@@ -587,15 +683,14 @@ describe('things the user must be able to see', () => {
 })
 
 describe('workspace shell and navigation', () => {
-  it('opens on the Analyze workspace with the tool immediately visible', () => {
+  it('opens on the Check an offer workspace with the tool immediately visible', () => {
     mockFetch()
     renderApp()
     expect(window.location.hash).toBe('#/analyze')
-    expect(screen.getByRole('heading', { level: 1, name: 'Analyze an offer' })).toBeInTheDocument()
-    expect(screen.getByText('Find the gap between what you expect and what the terms actually say.')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Check an offer' })).toBeInTheDocument()
     expect(screen.getByLabelText('Subscription terms')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: ANALYZE })).toBeInTheDocument()
-    expect(nav('Analyze')).toHaveAttribute('aria-current', 'page')
+    expect(nav('Check an offer')).toHaveAttribute('aria-current', 'page')
   })
 
   it('removes the public demo clutter', () => {
@@ -613,11 +708,8 @@ describe('workspace shell and navigation', () => {
     const user = userEvent.setup()
     mockFetch()
     renderApp()
-    const results = nav('Results')
-    expect(results).toHaveAttribute('aria-disabled', 'true')
-    await user.click(results)
+    expect(within(screen.getByTestId('primary-nav')).queryByRole('button', { name: 'Results' })).not.toBeInTheDocument()
     expect(screen.getByTestId('view-analyze')).toBeInTheDocument()
-    expect(window.location.hash).toBe('#/analyze')
   })
 
   it('navigates without reloading and keeps the inputs', async () => {
@@ -626,11 +718,11 @@ describe('workspace shell and navigation', () => {
     renderApp()
     await user.type(screen.getByLabelText('Subscription terms'), 'USD 5 per month')
     await user.type(screen.getByLabelText('Your expectation'), 'cheap')
-    await user.click(nav('About FAIR'))
+    await user.click(nav('About & limits'))
     expect(screen.getByRole('heading', { level: 1, name: 'About FAIR' })).toHaveFocus()
     expect(window.location.hash).toBe('#/about')
-    expect(screen.getByTestId('workspace-title')).toHaveTextContent('About FAIR')
-    await user.click(nav('Analyze'))
+    expect(screen.getByTestId('workspace-title')).toHaveTextContent('About & limits')
+    await user.click(nav('Check an offer'))
     expect(screen.getByLabelText('Subscription terms')).toHaveValue('USD 5 per month')
     expect(screen.getByLabelText('Your expectation')).toHaveValue('cheap')
   })
@@ -660,7 +752,7 @@ describe('workspace shell and navigation', () => {
     const user = userEvent.setup()
     mockFetch()
     renderApp()
-    await user.click(nav('About FAIR'))
+    await user.click(nav('About & limits'))
     const about = screen.getByTestId('view-about')
     expect(within(about).getByRole('heading', { name: 'Limitations' })).toBeInTheDocument()
     expect(within(about).getByRole('heading', { name: 'Privacy' })).toBeInTheDocument()
@@ -668,46 +760,26 @@ describe('workspace shell and navigation', () => {
     expect(about).toHaveTextContent('not legal or financial advice')
   })
 
-  it('mobile drawer opens as a dialog, closes with Escape, and returns focus', async () => {
-    const user = userEvent.setup()
-    mockFetch()
-    renderApp()
-    const menu = screen.getByRole('button', { name: 'Open navigation' })
-    await user.click(menu)
-    const dialog = screen.getByRole('dialog', { name: 'Main navigation' })
-    expect(within(dialog).getByRole('button', { name: /^Analyze/ })).toHaveFocus()
-    await user.keyboard('{Escape}')
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(menu).toHaveFocus()
-  })
-
-  it('mobile drawer navigates and closes', async () => {
-    const user = userEvent.setup()
-    mockFetch()
-    renderApp()
-    await user.click(screen.getByRole('button', { name: 'Open navigation' }))
-    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: /^About FAIR/ }))
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByTestId('view-about')).toBeInTheDocument()
-  })
 })
 
 describe('truthful system status', () => {
   it.each([
-    [HEALTH.notConfigured, 'not_configured', 'Live AI not configured', /no Meta API key is configured/],
-    [HEALTH.disabled, 'disabled', 'Live AI turned off', /turned off on this server/],
-    [null, 'unreachable', 'Server unreachable', /cannot be reached/],
-  ])('shows an honest unavailable state (%#)', async (health, status, pill, note) => {
+    [HEALTH.notConfigured, 'not_configured', /isn't set up on this server/],
+    [HEALTH.disabled, 'disabled', /turned off on this server/],
+    [null, 'unreachable', /can't be reached right now/],
+  ])('says so quietly under the form, with nothing in the top bar (%#)', async (health, status, note) => {
     mockFetchWith(health)
     renderApp()
-    await waitFor(() => expect(screen.getByTestId('status-pill')).toHaveAttribute('data-status', status))
-    expect(screen.getByTestId('status-pill')).toHaveTextContent(pill)
-    expect(screen.getByTestId('availability')).toHaveTextContent(note)
+    const availability = await screen.findByTestId('availability')
+    expect(availability).toHaveAttribute('data-status', status)
+    expect(availability).toHaveTextContent(note)
+    expect(availability).toHaveAttribute('role', 'status')
+    expect(screen.queryByTestId('status-pill')).not.toBeInTheDocument()
     expect(screen.queryByText(/Analysis by Meta Muse Spark/)).not.toBeInTheDocument()
   })
 
-  it('renders exactly one status region', async () => {
-    mockFetch()
+  it('renders exactly one status pill in replay mode, so a replay never passes for live', async () => {
+    mockFetchWith({ ...HEALTH.live, model: 'replay:muse-spark-1.3' })
     renderApp()
     await waitFor(() => expect(screen.getAllByTestId('status-pill')).toHaveLength(1))
   })
@@ -715,10 +787,30 @@ describe('truthful system status', () => {
   it('mentions Muse Spark as the engine only when the server reports live access', async () => {
     mockFetchWith(HEALTH.live)
     renderApp()
-    await waitFor(() => expect(screen.getByTestId('status-pill')).toHaveAttribute('data-status', 'live'))
-    expect(screen.getByTestId('status-pill')).toHaveTextContent('Live AI on')
-    expect(screen.getByTestId('availability')).toHaveTextContent('Analysis by Meta Muse Spark')
-    expect(screen.getByTestId('availability')).toHaveTextContent('muse-spark-1.3')
+    expect(await screen.findByTestId('availability')).toHaveTextContent('Analysis by Meta Muse Spark')
+    expect(screen.queryByTestId('status-pill')).not.toBeInTheDocument()
+  })
+
+  it('offers a real way forward when the server cannot be reached, and checks again on request', async () => {
+    const user = userEvent.setup()
+    const fetchMock = mockFetchWith(null)
+    renderApp()
+    await screen.findByTestId('availability')
+    const healthCalls = () => fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/api/health')).length
+    expect(healthCalls()).toBe(1)
+    await user.click(within(screen.getByTestId('availability')).getByRole('button', { name: 'Try again' }))
+    await waitFor(() => expect(healthCalls()).toBe(2))
+    await user.click(await screen.findByRole('button', { name: 'Open a saved example instead' }))
+    expect(await screen.findByTestId('replay-badge')).toHaveTextContent('Recorded synthetic example')
+    expect(screen.getByTestId('replay-notice')).toHaveTextContent('Nothing is running now')
+    expect(screen.queryByTestId('live-badge')).not.toBeInTheDocument()
+  })
+
+  it('keeps the first screen free of implementation details', async () => {
+    mockFetch()
+    renderApp()
+    await screen.findByTestId('availability')
+    expect(document.body).not.toHaveTextContent(/API key|Meta API|backend|Available after/)
   })
 })
 
@@ -770,17 +862,16 @@ describe('form validation', () => {
 })
 
 describe('language and direction', () => {
-  it('switches to Arabic RTL (sidebar mirrors via logical start) and back', async () => {
+  it('switches to Arabic RTL and back', async () => {
     const user = userEvent.setup()
     mockFetch()
     renderApp()
-    expect(screen.getByTestId('sidebar')).toHaveClass('start-0')
     await user.click(screen.getByRole('button', { name: 'Switch the interface to Arabic' }))
     expect(document.documentElement).toHaveAttribute('dir', 'rtl')
     expect(document.documentElement).toHaveAttribute('lang', 'ar')
     expect(screen.getByRole('heading', { level: 1, name: 'افحص عرضًا' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'اكشف الفجوة' })).toBeInTheDocument()
-    expect(within(screen.getByTestId('sidebar')).getByRole('button', { name: /^عن FAIR/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^عن FAIR/ })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'تبديل الواجهة إلى الإنجليزية' }))
     expect(document.documentElement).toHaveAttribute('dir', 'ltr')
   })
@@ -793,10 +884,10 @@ describe('language and direction', () => {
     expect(screen.getByTestId('live-badge')).toHaveTextContent('تحليل مباشر')
     expect(screen.getByTestId('verdict')).toHaveTextContent('تعارض')
     expect(screen.getByText(/لا يبقى مجانيًا/)).toBeInTheDocument() // Arabic explanation from the response
-    expect(screen.getByRole('region', { name: 'الإيصال المستقبلي' })).toHaveTextContent('الإجمالي خلال 12 شهرًا')
+    expect(screen.getByRole('region', { name: 'التكاليف بالتفصيل' })).toHaveTextContent('الإجمالي خلال 12 شهرًا')
     expect(screen.getByTestId('receipt-total-continue')).toHaveTextContent(/146[.٫]38 USD/)
-    expect(screen.getByRole('region', { name: 'مرآة التوقعات' })).toHaveTextContent('تُحاسَب تلقائيًا بعد التجربة')
-    await user.click(within(screen.getByTestId('sidebar')).getByRole('button', { name: /^التحليل/ }))
+    expect(screen.getByRole('region', { name: 'توقعك مقابل الشروط' })).toHaveTextContent('تُحاسَب تلقائيًا بعد التجربة')
+    await user.click(screen.getAllByRole('button', { name: /^افحص عرضًا/ })[0])
     expect(screen.getByLabelText('شروط الاشتراك')).toHaveValue(liveResponse().terms)
   })
 })
@@ -810,7 +901,6 @@ describe('live analysis → Results workspace', () => {
     expect(JSON.parse(init.body).language).toBe('en')
     expect(window.location.hash).toBe('#/results')
     expect(screen.getByRole('heading', { level: 1, name: 'Results' })).toHaveFocus()
-    expect(nav('Results')).toHaveAttribute('aria-current', 'page')
     expect(screen.getByText('Model: muse-spark-1.3')).toBeInTheDocument()
     expect(screen.queryByTestId('preview-badge')).not.toBeInTheDocument()
   })
@@ -818,8 +908,8 @@ describe('live analysis → Results workspace', () => {
   it('keeps results while visiting other views in the session', async () => {
     const user = userEvent.setup()
     await analyzeLive(user)
-    await user.click(nav('About FAIR'))
-    await user.click(nav('Analyze'))
+    await user.click(nav('About & limits'))
+    await user.click(nav('Check an offer'))
     expect(screen.getByRole('button', { name: 'View latest result' })).toBeInTheDocument()
     await user.click(nav('Results'))
     expect(screen.getByTestId('verdict')).toHaveAttribute('data-verdict', 'CONTRADICTION')
@@ -833,7 +923,7 @@ describe('live analysis → Results workspace', () => {
     expect(verdict).toHaveTextContent('The terms contradict your expectation')
     expect(verdict).toHaveTextContent('It does not stay free.')
     expect(within(verdict).getByText('AI interpretation')).toBeInTheDocument()
-    const mirror = screen.getByRole('region', { name: 'Expectation Mirror' })
+    const mirror = screen.getByRole('region', { name: 'Your expectation vs the terms' })
     const claims = within(mirror).getAllByTestId('claim')
     expect(claims.map((c) => c.dataset.verdict)).toEqual(['MATCH', 'CONTRADICTION'])
     expect(claims[0]).toHaveTextContent('“I can try it for free.”')
@@ -846,7 +936,7 @@ describe('live analysis → Results workspace', () => {
   it('Future Receipt shows backend amounts for each horizon and both paths', async () => {
     const user = userEvent.setup()
     await analyzeLive(user)
-    const receipt = screen.getByRole('region', { name: 'Future Receipt' })
+    const receipt = screen.getByRole('region', { name: 'Costs in detail' })
     expect(within(receipt).getByTestId('next-charge')).toHaveTextContent('11.99 USD, expected on day 14')
     expect(within(receipt).getByTestId('due-now')).toHaveTextContent('2.50 USD')
     const horizon = within(receipt).getByTestId('horizon-switch')
@@ -934,7 +1024,7 @@ describe('live analysis → Results workspace', () => {
     }
     expect(screen.getByTestId('receipt-unavailable-cancel')).toHaveTextContent('The terms do not say the plan renews automatically')
     expect(screen.queryByTestId('receipt-difference')).not.toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'Future Receipt' })).toHaveTextContent('No automatic charge identified')
+    expect(screen.getByRole('region', { name: 'Costs in detail' })).toHaveTextContent('No automatic charge identified')
     const claims = within(screen.getByTestId('mirror')).getAllByTestId('claim')
     expect(claims.map((c) => c.dataset.verdict)).toEqual(['UNKNOWN', 'UNKNOWN'])
     expect(within(claims[1]).getByTestId('claim-no-evidence')).toHaveTextContent('No sentence in the terms settles this claim.')
@@ -952,7 +1042,7 @@ describe('live analysis → Results workspace', () => {
     expect(within(refund).getByTestId('claim-no-evidence')).toBeInTheDocument()
     expect(refund).not.toHaveTextContent('renews automatically')
 
-    const evidence = screen.getByRole('region', { name: 'Verified evidence' })
+    const evidence = screen.getByRole('region', { name: 'All evidence from the terms' })
     expect(evidence).not.toHaveTextContent('Refunds are given')
     expect(evidence).not.toHaveTextContent(/service fee/i)
 
@@ -1009,7 +1099,7 @@ describe('live analysis → Results workspace', () => {
     await user.paste(live.expectation)
     await user.click(screen.getByRole('button', { name: 'اكشف الفجوة' }))
     await screen.findByTestId('live-badge')
-    const mirror = screen.getByRole('region', { name: 'مرآة التوقعات' })
+    const mirror = screen.getByRole('region', { name: 'توقعك مقابل الشروط' })
     expect(within(mirror).getAllByTestId('claim').map((c) => c.dataset.verdict)).toEqual(['MATCH', 'CONTRADICTION', 'UNKNOWN'])
     expect(mirror).toHaveTextContent('غير محسوم')
     expect(screen.getByTestId('receipt-deadline')).toHaveTextContent('قبل انتهاء الفترة التجريبية المجانية بـ48 ساعة على الأقل (اليوم 7)')
@@ -1143,10 +1233,10 @@ describe('live analysis → Results workspace', () => {
     expect(screen.getByTestId('verified-evidence')).toHaveTextContent('Claim 3 (closest text, does not settle it)')
   })
 
-  it("shows the user's own words above the claims, so a short claim stays understandable", async () => {
+  it("leads with the user's own words", async () => {
     const user = userEvent.setup()
     const { live } = await analyzeLive(user, 'decision-twin')
-    expect(screen.getByTestId('mirror-original')).toHaveTextContent(live.expectation)
+    expect(screen.getByTestId('verdict')).toHaveTextContent(live.expectation)
   })
 
   it('falls back to the previous cards for a response without claims or decision (backward compatible)', async () => {
@@ -1159,6 +1249,7 @@ describe('live analysis → Results workspace', () => {
     await screen.findByTestId('live-badge')
     expect(screen.queryByTestId('mirror')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Expectation vs reality' })).toBeInTheDocument()
+    await user.click(screen.getByText('Costs in detail'))
     expect(screen.getByRole('region', { name: 'Financial impact' })).toBeInTheDocument()
     expect(screen.getByTestId('projection-12')).toHaveTextContent('146.38 USD')
     expect(screen.getByTestId('verdict')).toHaveAttribute('data-verdict', 'CONTRADICTION')
@@ -1195,10 +1286,10 @@ describe('errors never produce results', () => {
     await fillAndSubmit(user, 'Free for 7 days.', 'free forever')
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent(title)
-    expect(alert).toHaveTextContent(`Error code: ${code}`)
+    expect(alert).not.toHaveTextContent('Error code')
     expect(alert).not.toHaveTextContent('MODEL_API_KEY')
     expect(screen.getByTestId('view-analyze')).toBeInTheDocument()
-    expect(nav('Results')).toHaveAttribute('aria-disabled', 'true')
+    expect(within(screen.getByTestId('primary-nav')).queryByRole('button', { name: 'Results' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('verdict')).not.toBeInTheDocument()
   })
 
@@ -1221,8 +1312,8 @@ describe('errors never produce results', () => {
     await screen.findByTestId('live-badge')
     await user.click(screen.getByRole('button', { name: 'Edit inputs' }))
     await user.click(screen.getByRole('button', { name: ANALYZE }))
-    expect(await screen.findByRole('alert')).toHaveTextContent('The Meta API is unavailable')
-    expect(nav('Results')).toHaveAttribute('aria-disabled', 'true')
+    expect(await screen.findByRole('alert')).toHaveTextContent('The analysis service is unavailable')
+    expect(within(screen.getByTestId('primary-nav')).queryByRole('button', { name: 'Results' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'View latest result' })).not.toBeInTheDocument()
   })
 
@@ -1235,7 +1326,7 @@ describe('errors never produce results', () => {
     )
     renderApp()
     await fillAndSubmit(user, live.terms, live.expectation)
-    expect(await screen.findByRole('alert')).toHaveTextContent('The Meta API is unavailable')
+    expect(await screen.findByRole('alert')).toHaveTextContent('The analysis service is unavailable')
     await user.click(screen.getByRole('button', { name: 'Try again' }))
     await screen.findByTestId('live-badge')
     expect(analyzeCalls(fetchMock)).toHaveLength(2)
@@ -1266,7 +1357,7 @@ describe('errors never produce results', () => {
     mockFetch(fakeResponse(502))
     renderApp()
     await fillAndSubmit(user, 'terms', 'expectation')
-    expect(await screen.findByRole('alert')).toHaveTextContent("Can't reach the FAIR server")
+    expect(await screen.findByRole('alert')).toHaveTextContent("Can't reach FAIR right now")
   })
 
   it('shows loading, and Cancel aborts without an error or result', async () => {
@@ -1311,6 +1402,179 @@ describe('development-only sample previews', () => {
     await screen.findByTestId('preview-badge')
     await user.click(screen.getByRole('button', { name: 'Close preview' }))
     expect(screen.getByTestId('view-analyze')).toBeInTheDocument()
-    expect(nav('Results')).toHaveAttribute('aria-disabled', 'true')
+    expect(within(screen.getByTestId('primary-nav')).queryByRole('button', { name: 'Results' })).not.toBeInTheDocument()
+  })
+})
+
+
+describe('home page', () => {
+  const home = () => renderApp('en', '#/home')
+
+  it('opens on an empty address, says what FAIR is, and makes no analysis', async () => {
+    const fetchMock = mockFetch()
+    render(
+      <ThemeProvider>
+        <LanguageProvider initialLang="en">
+          <App />
+        </LanguageProvider>
+      </ThemeProvider>,
+    )
+    expect(screen.getByTestId('view-home')).toBeInTheDocument()
+    expect(window.location.hash).toBe('#/home')
+    expect(screen.getByRole('heading', { level: 1, name: "Know what you're agreeing to." })).toBeInTheDocument()
+    expect(analyzeCalls(fetchMock)).toHaveLength(0)
+    await screen.findByTestId('product-proof')
+  })
+
+  it('labels its preview as a recorded sample and labels a conditional amount beside it', () => {
+    mockFetch()
+    home()
+    expect(screen.getByTestId('proof-label')).toHaveTextContent('Recorded sample')
+    expect(screen.getByTestId('proof-label')).toHaveTextContent('Not a live analysis')
+    const cancel = within(screen.getByTestId('product-proof')).getByTestId('primary-cancel')
+    expect(cancel).toHaveTextContent('Depends on assumptions')
+    expect(cancel).toHaveTextContent('FAIR cannot confirm that cancelling is free')
+  })
+
+  it('every action goes somewhere real', async () => {
+    const user = userEvent.setup()
+    mockFetch()
+    home()
+    await user.click(within(screen.getByTestId('view-home')).getByRole('button', { name: /^Check an offer/ }))
+    expect(screen.getByTestId('view-analyze')).toBeInTheDocument()
+    await user.click(screen.getByTestId('brand-home'))
+    expect(screen.getByTestId('view-home')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'About & limits' }))
+    expect(screen.getByTestId('view-about')).toBeInTheDocument()
+  })
+
+  it('a recorded sample opens labelled, and the next step is an empty form', async () => {
+    const user = userEvent.setup()
+    const fetchMock = mockFetch()
+    home()
+    await user.click(screen.getByRole('button', { name: 'See a recorded sample' }))
+    expect(await screen.findByTestId('replay-badge')).toBeInTheDocument()
+    expect(screen.getByTestId('verdict')).toHaveAttribute('data-verdict', 'CONTRADICTION')
+    expect(analyzeCalls(fetchMock)).toHaveLength(0)
+    await user.click(screen.getByRole('button', { name: 'Check another offer' }))
+    expect(screen.getByLabelText('Subscription terms')).toHaveValue('')
+  })
+
+  it('speaks to customers: no invented claims and no competition or build talk', () => {
+    mockFetch()
+    home()
+    expect(document.body).not.toHaveTextContent(/pricing|testimonial|trusted by|more accurate|guarantee|hackathon|benchmark|prompt/i)
+  })
+
+  it('reads in Arabic', () => {
+    mockFetch()
+    renderApp('ar', '#/home')
+    expect(screen.getByRole('heading', { level: 1, name: 'اعرف على ماذا توافق.' })).toBeInTheDocument()
+    expect(document.body.textContent).not.toMatch(/home\.|examples\.|result\.|undefined/)
+  })
+})
+
+describe('the answer comes first', () => {
+  async function show(user, id) {
+    const live = liveResponse(id)
+    mockFetch(fakeResponse(200, live.body))
+    renderApp()
+    await fillAndSubmit(user, live.terms, live.expectation)
+    await screen.findByTestId('verdict')
+    return live
+  }
+
+  it('holds the verdict, reason, belief, clause and money together', async () => {
+    const user = userEvent.setup()
+    const live = await show(user, 'decision-twin')
+    const answer = screen.getByTestId('verdict')
+    expect(answer).toHaveTextContent('The terms contradict your expectation')
+    expect(answer).toHaveTextContent(live.expectation)
+    expect(answer.querySelector('mark')).toHaveTextContent('renews automatically')
+    expect(within(answer).getByTestId('primary-keep')).toHaveTextContent('119.88 USD')
+  })
+
+  it('draws a conditional cancellation as a scenario with its condition beside the amount', async () => {
+    const user = userEvent.setup()
+    await show(user, 'decision-twin')
+    const cancel = screen.getByTestId('primary-cancel')
+    expect(cancel).toHaveTextContent('0.00 USD')
+    expect(cancel).toHaveTextContent('Depends on assumptions')
+    expect(cancel).toHaveTextContent('Only if you meet the deadline')
+    expect(screen.getByTestId('primary-keep').querySelector('dd').className).toContain('text-3xl')
+    expect(cancel.querySelector('dd').className).not.toContain('text-3xl')
+  })
+
+  it('keeps an unsettled claim in the answer, not only in a closed row', async () => {
+    const user = userEvent.setup()
+    await show(user, 'decision-twin')
+    expect(screen.getByTestId('primary-open')).toHaveTextContent('I can cancel whenever I want.')
+    expect(screen.getByTestId('uncertain').querySelector('details')).toHaveAttribute('open')
+  })
+
+  it('details start closed, and the actions open the row they name', async () => {
+    const user = userEvent.setup()
+    await show(user, 'decision-twin')
+    const options = screen.getByTestId('decision-reveal').querySelector('details')
+    expect(options).not.toHaveAttribute('open')
+    await user.click(screen.getByRole('button', { name: 'Explore your options' }))
+    expect(options).toHaveAttribute('open')
+    await user.click(screen.getByRole('button', { name: 'View full details' }))
+    expect(screen.getByTestId('mirror').querySelector('details')).toHaveAttribute('open')
+  })
+
+  it('opening a quote from the answer opens the evidence row', async () => {
+    const user = userEvent.setup()
+    await show(user, 'decision-twin')
+    await user.click(within(screen.getByTestId('verdict')).getByRole('button', { name: 'See it in the terms' }))
+    expect(screen.getByTestId('evidence').querySelector('details')).toHaveAttribute('open')
+    expect(screen.getByTestId('source-text').querySelector('mark[data-active="true"]')).not.toBeNull()
+  })
+
+  it('a withheld total stays visible in the answer, with the reason and no amount as a total', async () => {
+    const user = userEvent.setup()
+    const { terms, expectation, body } = withheldCases.cases['CH-05']
+    mockFetch(fakeResponse(200, body))
+    renderApp()
+    await fillAndSubmit(user, terms, expectation)
+    const box = await screen.findByTestId('primary-withheld')
+    expect(box).toHaveTextContent('No total shown')
+    expect(box).toHaveTextContent('The terms also state 4.50 USD')
+    expect(screen.queryByTestId('primary-keep')).not.toBeInTheDocument()
+  })
+})
+
+describe('demo mode says what it can do', () => {
+  it('explains an unsupported input as a demo limit, not an outage', async () => {
+    const user = userEvent.setup()
+    mockFetchWith({ ...HEALTH.live, model: 'replay:muse-spark-1.3' }, fakeResponse(502, { error: { code: 'model_unavailable', message: 'x' } }))
+    renderApp()
+    expect(await screen.findByTestId('availability')).toHaveTextContent('only the examples below can be checked')
+    await fillAndSubmit(user, 'Some other offer.', 'A belief.')
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('This demo only checks the examples')
+    expect(alert).not.toHaveTextContent('unavailable')
+  })
+})
+
+describe('examples on the form', () => {
+  it('with a replay server, fills the form so the real pipeline answers it', async () => {
+    const user = userEvent.setup()
+    mockFetchWith({ ...HEALTH.live, model: 'replay:muse-spark-1.3' })
+    renderApp()
+    await screen.findByTestId('status-pill')
+    await user.click(screen.getByTestId('example-FAIR-011'))
+    expect(screen.getByLabelText('Subscription terms').value).toContain('Free for 21 days')
+    expect(screen.queryByTestId('replay-badge')).not.toBeInTheDocument()
+  })
+
+  it('with no server, opens the saved result and says nothing is running', async () => {
+    const user = userEvent.setup()
+    mockFetchWith(null)
+    renderApp()
+    await screen.findByTestId('availability')
+    await user.click(screen.getByTestId('example-FAIR-012'))
+    expect(await screen.findByTestId('replay-notice')).toHaveTextContent('Nothing is running now')
+    expect(screen.getByTestId('verdict')).toHaveAttribute('data-verdict', 'UNKNOWN')
   })
 })

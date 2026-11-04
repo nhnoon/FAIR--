@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useLang } from '../i18n/LanguageContext.jsx'
 import { collectEvidence, evidenceFieldLabel, highlightRanges } from '../lib/evidence.js'
 import { buildSegments } from '../lib/format.js'
+import Chapter from './Chapter.jsx'
 import { CheckIcon } from './icons.jsx'
 
 /** One entry per distinct quoted span, listing every finding it supports (no repeated quotes). */
@@ -30,21 +31,16 @@ export default function EvidenceViewer({ data, sourceText, activeId, onActivate 
   }, [activeId])
 
   return (
-    <section aria-labelledby="evidence-heading" className="card p-5 sm:p-6">
-      <h2 id="evidence-heading" className="section-title">
-        {t('evidence.heading')}
-      </h2>
-      <p className="mt-0.5 text-sm text-muted">{t('evidence.subtitle')}</p>
-
-      <div className="mt-4 grid gap-5 lg:grid-cols-2">
+    <Chapter id="evidence-heading" title={t('evidence.heading')} testId="evidence">
+      <div className="grid gap-6 lg:grid-cols-2">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-fg">{t('evidence.source')}</h3>
+          <h3 className="text-sm font-medium text-fg">{t('evidence.source')}</h3>
           <div
             dir="auto"
             data-testid="source-text"
             tabIndex={0}
             aria-label={t('evidence.source')}
-            className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-line bg-subtle p-4 text-[15px] leading-relaxed text-fg"
+            className="mt-2 max-h-96 overflow-y-auto whitespace-pre-wrap break-words rounded-xl bg-paper p-4 text-[15px] leading-relaxed text-paper-fg"
           >
             {segments.map((seg, i) => {
               if (seg.ids.length === 0) return <span key={i}>{seg.text}</span>
@@ -54,9 +50,7 @@ export default function EvidenceViewer({ data, sourceText, activeId, onActivate 
                   key={i}
                   data-evidence-ids={seg.ids.join(' ')}
                   data-active={active ? 'true' : undefined}
-                  className={`rounded px-0.5 text-fg underline decoration-link/50 decoration-2 underline-offset-4 ${
-                    active ? 'bg-mark-active ring-2 ring-focus' : 'bg-mark'
-                  }`}
+                  className={`rounded px-0.5 text-paper-fg transition-colors ${active ? 'bg-mark-active ring-2 ring-focus' : 'bg-mark'}`}
                 >
                   {seg.text}
                 </mark>
@@ -66,11 +60,11 @@ export default function EvidenceViewer({ data, sourceText, activeId, onActivate 
         </div>
 
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-fg">{t('evidence.verifiedList')}</h3>
+          <h3 className="text-sm font-medium text-fg">{t('evidence.verifiedList')}</h3>
           {groups.length === 0 ? (
             <p className="mt-2 text-sm text-muted">{t('evidence.noneVerified')}</p>
           ) : (
-            <ul className="mt-2 space-y-2" data-testid="verified-evidence">
+            <ul className="mt-2 divide-y divide-line border-y border-line" data-testid="verified-evidence">
               {groups.map((g) => {
                 const ids = g.items.map((it) => it.id)
                 const pressed = ids.includes(activeId)
@@ -80,15 +74,13 @@ export default function EvidenceViewer({ data, sourceText, activeId, onActivate 
                       type="button"
                       onClick={() => onActivate(ids[0])}
                       aria-pressed={pressed}
-                      className={`w-full rounded-xl border p-3 text-start transition-colors ${
-                        pressed ? 'border-focus bg-mark' : 'border-line bg-surface hover:bg-subtle'
-                      }`}
+                      className={`w-full px-2 py-3 text-start transition-colors ${pressed ? 'bg-mark' : 'hover:bg-subtle'}`}
                     >
                       <span className="flex items-start justify-between gap-2">
-                        <span className="text-xs font-semibold text-muted">
+                        <span className="text-xs text-muted">
                           {g.items.map((it) => evidenceFieldLabel(t, it, billing)).join(' · ')}
                         </span>
-                        <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-link">
+                        <span className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-link">
                           <CheckIcon width={14} height={14} />
                           {t('evidence.verified')}
                         </span>
@@ -105,6 +97,6 @@ export default function EvidenceViewer({ data, sourceText, activeId, onActivate 
           )}
         </div>
       </div>
-    </section>
+    </Chapter>
   )
 }

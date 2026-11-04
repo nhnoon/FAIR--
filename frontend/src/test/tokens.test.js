@@ -34,7 +34,8 @@ const PAIRS = [
   ['muted', 'surface', 4.5], ['muted', 'bg', 4.5], ['muted', 'subtle', 4.5],
   ['on-primary', 'primary', 4.5], ['on-primary', 'primary-hover', 4.5],
   ['link', 'surface', 4.5], ['fg', 'mark', 4.5], ['fg', 'mark-active', 4.5],
-  ['sidebar-fg', 'sidebar', 4.5], ['sidebar-muted', 'sidebar', 4.5], ['sidebar-fg', 'sidebar-active', 4.5],
+  ['ink-fg', 'ink', 4.5], ['ink-muted', 'ink', 4.5], ['paper-fg', 'paper', 4.5], ['paper-muted', 'paper', 4.5],
+  ['paper-fg', 'hl-match', 4.5], ['paper-fg', 'hl-contra', 4.5], ['paper-fg', 'hl-unknown', 4.5],
   ['match-fg', 'match-bg', 4.5], ['contra-fg', 'contra-bg', 4.5], ['unknown-fg', 'unknown-bg', 4.5],
   ['on-solid', 'match-solid', 3], ['on-solid', 'contra-solid', 3], ['on-solid', 'unknown-solid', 3],
   ['focus', 'surface', 3], ['focus', 'bg', 3],
@@ -62,15 +63,15 @@ describe('approved palette', () => {
 
   it('uses the exact approved values', () => {
     expect([hex(light.bg), hex(light.surface), hex(light.primary), hex(light.fg), hex(light.line)]).toEqual([
-      '#F5F7FA', '#FFFFFF', '#111D35', '#111D35', '#DCE3ED',
+      '#F4F6FA', '#FFFFFF', '#102250', '#0B1630', '#DEE3ED',
     ])
     expect([hex(dark.bg), hex(dark.surface), hex(dark.primary), hex(dark.fg), hex(dark.line)]).toEqual([
-      '#080F1E', '#152239', '#293F67', '#F4F6FB', '#293A54',
+      '#070C1A', '#0F182C', '#F0F3FA', '#F0F3FA', '#24304D',
     ])
   })
 
   it('has no bright-blue or cyan brand tokens', () => {
-    const brand = ['primary', 'primary-hover', 'link', 'mark', 'mark-active', 'focus', 'sidebar', 'sidebar-active']
+    const brand = ['primary', 'primary-hover', 'mark', 'mark-active', 'ink']
     for (const t of [light, dark]) {
       for (const name of brand) {
         const [r, g, b] = t[name]

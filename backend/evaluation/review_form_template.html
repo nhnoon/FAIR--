@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offer review form</title>
+<style>
+:root { --bg:#f6f7f9; --card:#fff; --fg:#1b2430; --muted:#5a6675; --line:#cfd6df; --accent:#1f4f8f; --warn:#8a5a00; }
+@media (prefers-color-scheme: dark) { :root { --bg:#12171e; --card:#1b222c; --fg:#e8ecf1; --muted:#a4afbd; --line:#39434f; --accent:#8db8ef; --warn:#e5b567; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif; }
+main { max-width:820px; margin:auto; padding:16px; }
+h1 { font-size:1.5rem; margin:.5rem 0; } h2 { font-size:1.15rem; margin:0 0 .5rem; } h3 { font-size:1rem; margin:1rem 0 .25rem; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:14px 0; }
+.ar { direction:rtl; text-align:right; font-family:Tahoma,"Segoe UI",Arial,sans-serif; }
+.two { display:grid; gap:14px; } @media (min-width:760px) { .two { grid-template-columns:1fr 1fr; } }
+.source { background:var(--bg); border-inline-start:4px solid var(--accent); border-radius:6px; padding:10px 12px; font-size:1.05rem; overflow-wrap:anywhere; }
+.muted { color:var(--muted); font-size:.92rem; } .tag { color:var(--muted); font-weight:600; font-size:.88rem; }
+label.opt { display:flex; gap:8px; align-items:flex-start; padding:6px 0; min-height:36px; }
+label.block { display:block; font-weight:600; margin-top:12px; } label.block span { display:block; font-weight:400; color:var(--muted); font-size:.9rem; }
+textarea, input[type=text], select { width:100%; padding:9px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--fg); font:inherit; }
+textarea { min-height:70px; } legend { font-weight:600; padding:0; } fieldset { border:0; padding:0; margin:12px 0 0; }
+.grid { display:grid; gap:0 12px; } @media (min-width:600px) { .grid { grid-template-columns:1fr 1fr; } }
+button { font:inherit; font-weight:600; min-height:44px; padding:8px 16px; border-radius:8px; border:1px solid var(--accent); background:var(--accent); color:var(--bg); cursor:pointer; }
+button.alt { background:transparent; color:var(--accent); } .bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+#progress { font-weight:600; } #missing { color:var(--warn); }
+@media print { .noprint { display:none; } body { background:#fff; color:#000; } .card { break-inside:avoid; } textarea { min-height:90px; } }
+</style>
+</head>
+<body>
+<main>
+<h1>Offer review form <span class="muted">· نموذج مراجعة العروض</span></h1>
+
+<section class="card two">
+  <div>
+    <h2>What to do</h2>
+    <p>You will read 12 short subscription offers. Each comes with something a person believes about that offer. Please decide what the offer's words say about that belief. There are no trick scoring rules, and your honest reading is what matters. It takes about 30 to 40 minutes.</p>
+    <ul>
+      <li>Work alone. Please do not discuss the cases until you have sent your answers.</li>
+      <li>Do not use AI tools, search engines, or anything beyond this form.</li>
+      <li>Use only the offer's words. Do not add what you know about companies, laws or normal practice.</li>
+      <li>Simple arithmetic on numbers in the offer is fine.</li>
+      <li>If you are unsure, say so in the last box. Disagreement and doubt are useful.</li>
+      <li>If you cannot read a case's language, choose "I cannot review this case".</li>
+    </ul>
+  </div>
+  <div class="ar" lang="ar">
+    <h2>المطلوب</h2>
+    <p>ستقرأ 12 عرض اشتراك قصيرًا، ومع كل عرض شيء يعتقده شخص ما عنه. يُرجى تحديد ما تقوله كلمات العرض عن هذا الاعتقاد. لا توجد قواعد خفية للتقييم، والمهم هو قراءتك الصادقة. يستغرق ذلك نحو 30 إلى 40 دقيقة.</p>
+    <ul>
+      <li>اعمل بمفردك، ويُرجى عدم مناقشة الحالات قبل إرسال إجاباتك.</li>
+      <li>لا تستخدم أدوات الذكاء الاصطناعي أو محركات البحث أو أي شيء غير هذا النموذج.</li>
+      <li>اعتمد على كلمات العرض فقط، ولا تُضف ما تعرفه عن الشركات أو الأنظمة أو الممارسات المعتادة.</li>
+      <li>يمكنك إجراء عمليات حسابية بسيطة على الأرقام الواردة في العرض.</li>
+      <li>إذا لم تكن متأكدًا، فاذكر ذلك في الخانة الأخيرة. فالاختلاف والشك مفيدان.</li>
+      <li>إذا لم تستطع قراءة لغة إحدى الحالات، فاختر «لا أستطيع مراجعة هذه الحالة».</li>
+    </ul>
+  </div>
+</section>
+
+<section class="card two">
+  <div>
+    <h2>The three answers</h2>
+    <p><b>MATCH:</b> the offer's words clearly support the whole belief.</p>
+    <p><b>CONTRADICTION:</b> a passage in the offer actually conflicts with part of the belief.</p>
+    <p><b>UNKNOWN:</b> the offer's words do not settle whether the belief is right.</p>
+  </div>
+  <div class="ar" lang="ar">
+    <h2>الإجابات الثلاث</h2>
+    <p><b>MATCH (متوافق):</b> تدعم كلمات العرض الاعتقاد كله بوضوح.</p>
+    <p><b>CONTRADICTION (تعارض):</b> يوجد مقطع في العرض يتعارض فعلًا مع جزء من الاعتقاد.</p>
+    <p><b>UNKNOWN (غير محسوم):</b> لا تحسم كلمات العرض صحة الاعتقاد من عدمها.</p>
+  </div>
+</section>
+
+<section class="card noprint">
+  <label class="block" for="code">Reviewer code <span>The code you were given, not your name. · الرمز الذي أُعطي لك، وليس اسمك.</span></label>
+  <input type="text" id="code" autocomplete="off" maxlength="20">
+  <p class="muted">Your answers are kept only in this browser until you save the file. · تبقى إجاباتك في هذا المتصفح فقط حتى تحفظ الملف.</p>
+</section>
+
+<div id="cases"></div>
+
+<section class="card noprint">
+  <p id="progress" aria-live="polite"></p>
+  <p id="missing"></p>
+  <div class="bar">
+    <button type="button" id="save">Save my answers · احفظ إجاباتي</button>
+    <button type="button" class="alt" id="print">Print a blank copy · اطبع نسخة</button>
+  </div>
+  <p class="muted">This saves one file to your device. Please send that file back to the person who asked you. · يحفظ هذا ملفًا واحدًا على جهازك. يُرجى إرساله إلى من طلب منك المراجعة.</p>
+</section>
+</main>
+
+<script>
+var CASES = __CASES__;
+var INPUTS_SHA256 = "__INPUTS_SHA256__";
+var KEY = "offer-review-" + INPUTS_SHA256.slice(0, 12);
+var LANG = { English: "English · الإنجليزية", Arabic: "Arabic · العربية", Mixed: "Mixed · مختلطة" };
+var TEXT_FIELDS = [
+  ["quote", "Exact words from the offer · الكلمات الحرفية من العرض", "Copy the exact words that decide your answer, one passage per line. Write \"none\" if no passage decides it. · انسخ الكلمات الحرفية التي تحسم إجابتك، كل مقطع في سطر. اكتب «لا يوجد» إذا لم يحسمها أي مقطع."],
+  ["reason", "Why, in a sentence or two · السبب في جملة أو جملتين", ""],
+  ["missing", "Missing conditions · الشروط الناقصة", "Anything the offer would need to say to settle this. · ما كان ينبغي أن يذكره العرض لحسم الأمر."]
+];
+
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+var state = load();
+state.answers = state.answers || {};
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+function el(tag, attrs, children) {
+  var n = document.createElement(tag);
+  Object.keys(attrs || {}).forEach(function (k) { if (k === "text") n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); });
+  (children || []).forEach(function (c) { n.appendChild(c); });
+  return n;
+}
+function answer(id) { return (state.answers[id] = state.answers[id] || {}); }
+function setValue(id, field, value) { answer(id)[field] = value; persist(); refresh(); }
+
+function radios(id, field, legend, options) {
+  var set = el("fieldset", {}, [el("legend", { text: legend })]);
+  options.forEach(function (o) {
+    var input = el("input", { type: "radio", name: id + "-" + field, value: o[0] });
+    if (answer(id)[field] === o[0]) input.checked = true;
+    input.addEventListener("change", function () { setValue(id, field, o[0]); });
+    set.appendChild(el("label", { class: "opt" }, [input, el("span", { text: o[1] })]));
+  });
+  return set;
+}
+function box(id, field, title, help, single) {
+  var fid = id + "-" + field;
+  var input = el(single ? "input" : "textarea", { id: fid, dir: "auto" });
+  if (single) input.type = "text";
+  input.value = answer(id)[field] || "";
+  input.addEventListener("input", function () { setValue(id, field, input.value); });
+  var label = el("label", { class: "block", for: fid, text: title });
+  if (help) label.appendChild(el("span", { text: help }));
+  return el("div", {}, [label, input]);
+}
+function render() {
+  var root = document.getElementById("cases");
+  CASES.forEach(function (c, i) {
+    var id = c.case_id;
+    var card = el("section", { class: "card", "aria-label": id }, [
+      el("h2", { text: "Case " + (i + 1) + " of " + CASES.length + " · " + id }),
+      el("p", { class: "muted", text: "Language · اللغة: " + LANG[c.language] }),
+      el("h3", { text: "The offer · العرض" }),
+      el("div", { class: "source", dir: "auto", text: c.terms }),
+      el("h3", { text: "What the person believes · ما يعتقده الشخص" }),
+      el("div", { class: "source", dir: "auto", text: c.expectation }),
+      radios(id, "verdict", "Your answer · إجابتك", [
+        ["MATCH", "MATCH · متوافق"], ["CONTRADICTION", "CONTRADICTION · تعارض"], ["UNKNOWN", "UNKNOWN · غير محسوم"],
+        ["CANNOT_REVIEW", "I cannot review this case · لا أستطيع مراجعة هذه الحالة"]
+      ])
+    ]);
+    TEXT_FIELDS.forEach(function (f) { card.appendChild(box(id, f[0], f[1], f[2])); });
+    card.appendChild(el("h3", { text: "Money, according to the offer's words · المال، بحسب كلمات العرض" }));
+    card.appendChild(el("p", { class: "muted", text: "Leave a box empty if the offer does not state it. · اترك الخانة فارغة إذا لم يذكرها العرض." }));
+    var grid = el("div", { class: "grid" }, [
+      box(id, "recurring_price", "Regular repeating price · السعر المتكرر المعتاد", "", true),
+      box(id, "intro_price", "Introductory price · السعر الترويجي", "", true),
+      box(id, "one_time_fees", "One-time fees · رسوم لمرة واحدة", "Separate with commas. · افصل بينها بفواصل.", true)
+    ]);
+    var fid = id + "-billing_period";
+    var select = el("select", { id: fid }, [["", "Choose · اختر"], ["monthly", "Monthly · شهري"], ["yearly", "Yearly · سنوي"], ["weekly", "Weekly · أسبوعي"], ["one_time", "One time · مرة واحدة"], ["unknown", "Not stated or unclear · غير مذكور أو غير واضح"]].map(function (o) { return el("option", { value: o[0], text: o[1] }); }));
+    select.value = answer(id).billing_period || "";
+    select.addEventListener("change", function () { setValue(id, "billing_period", select.value); });
+    grid.appendChild(el("div", {}, [el("label", { class: "block", for: fid, text: "How often it is billed · دورة الفوترة" }), select]));
+    card.appendChild(grid);
+    card.appendChild(radios(id, "total_status", "Can a complete total for the first 12 months be established from the offer, without assuming anything it does not state? · هل يمكن تحديد إجمالي كامل لأول 12 شهرًا من العرض، دون افتراض شيء لم يذكره؟", [
+      ["yes", "Yes · نعم"], ["no", "No, not established · لا، غير محدد"], ["unsure", "I am not sure · لست متأكدًا"]
+    ]));
+    card.appendChild(box(id, "total_amount", "If yes, the total · إذا كانت الإجابة نعم، فما الإجمالي؟", "", true));
+    card.appendChild(box(id, "ambiguity", "Anything unclear, or that others might read differently · أي شيء غير واضح، أو قد يقرؤه غيرك بشكل مختلف", ""));
+    root.appendChild(card);
+  });
+}
+function unanswered() {
+  return CASES.filter(function (c) { var a = answer(c.case_id); return !a.verdict || !a.total_status; }).map(function (c) { return c.case_id; });
+}
+function refresh() {
+  var left = unanswered();
+  document.getElementById("progress").textContent = (CASES.length - left.length) + " of " + CASES.length + " cases answered · تمت الإجابة عن " + (CASES.length - left.length) + " من " + CASES.length;
+  document.getElementById("missing").textContent = left.length ? "Still to answer · المتبقي: " + left.join(", ") : "";
+}
+document.getElementById("code").value = state.reviewer_code || "";
+document.getElementById("code").addEventListener("input", function (e) { state.reviewer_code = e.target.value.trim(); persist(); });
+document.getElementById("print").addEventListener("click", function () { window.print(); });
+document.getElementById("save").addEventListener("click", function () {
+  if (!state.reviewer_code) { document.getElementById("missing").textContent = "Please enter your reviewer code first. · يُرجى إدخال رمز المراجع أولًا."; document.getElementById("code").focus(); return; }
+  var answers = {};
+  CASES.forEach(function (c) { answers[c.case_id] = answer(c.case_id); });
+  var out = { form: "offer-review-v2", inputs_sha256: INPUTS_SHA256, reviewer_code: state.reviewer_code, saved_utc: new Date().toISOString(), answers: answers };
+  var link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }));
+  link.download = "review_" + state.reviewer_code.replace(/[^\w-]/g, "_") + ".json";
+  document.body.appendChild(link); link.click(); link.remove();
+});
+render();
+refresh();
+</script>
+</body>
+</html>

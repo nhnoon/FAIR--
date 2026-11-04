@@ -28,7 +28,7 @@ export function apiBaseUrl(raw = import.meta.env.VITE_API_BASE_URL) {
 export function apiUrl(path) {
   return `${apiBaseUrl()}${path}`
 }
-export const REQUEST_TIMEOUT_MS = 60_000 // backend: 45 s model timeout, no retries
+export const REQUEST_TIMEOUT_MS = 110_000 // above the live backend's 90 s model timeout, so the server answers first; no retries
 
 const VERDICTS = new Set(['MATCH', 'CONTRADICTION', 'UNKNOWN'])
 
@@ -70,6 +70,7 @@ export async function getHealth({ fetchImpl = globalThis.fetch, timeoutMs = 8000
 
 /** A replay server reports this model prefix. Its results are saved outputs, never live analysis. */
 export const isReplayModel = (model) => String(model || '').startsWith('replay:')
+export const isEarlierPromptReplay = (model) => isReplayModel(model) && String(model).endsWith(':prompt-v4')
 
 /** replay | live | not_configured | disabled | unreachable, from a getHealth() result. */
 export function liveStatus(health) {

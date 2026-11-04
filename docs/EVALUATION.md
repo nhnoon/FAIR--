@@ -10,7 +10,7 @@ All figures come from saved runs on FAIR-Bench v1. Run folders are kept locally 
 - **Validation was not fully independent of development.** The author read Validation rows before writing the annotation overlay and the promise check.
 - **Real-world accuracy is unmeasured.** Perfect scores here must not be read as 100% accuracy on real terms.
 - **No user study** shows that FAIR improves decisions.
-- **FAIR has not been compared with using Muse Spark directly.** See [COMPARISON_PROTOCOL.md](COMPARISON_PROTOCOL.md).
+- **Direct Muse Spark did better than FAIR** in the one comparison run so far, on 12 new synthetic cases scored against author-draft labels. See [the comparison below](#comparison-with-direct-muse-spark).
 
 ## Results
 
@@ -49,14 +49,54 @@ Model `muse-spark-1.3`. "Shown" is the verdict the user sees, and it is the numb
 
 A naive keyword script, written after seeing the labels, scored 11/15 on Development and 11/15 on Validation. On Validation, FAIR was right on 4 cases where it was wrong and lost none (exact McNemar p = 0.125). This does not establish statistical superiority.
 
+## Comparison with direct Muse Spark
+
+Run once on 2026-11-02 under [COMPARISON_PROTOCOL.md](COMPARISON_PROTOCOL.md): challenge set v2, 12 cases (5 English, 4 Arabic, 3 mixed), one request per case per system, both on `muse-spark-1.3`. **Scored against author-draft labels, not independent.** Both systems answered all 12 cases with no errors.
+
+| Measure | FAIR (Prompt v5) | Direct Muse Spark |
+|---|---|---|
+| Verdict shown to the user | 9/12 | **11/12** |
+| FAIR's model verdict before its checks | 10/12 | — |
+| False reassurance | 0/7 | 0/7 |
+| Unsupported certainty | **2/12** | 3/12 |
+| Invented quotes | 0 | 0 |
+| Recurring price | 5/12 | **10/12** |
+| 12-month total | 7/12 | **10/12** |
+| Total withheld when the label has one | 4 | 0 |
+| Total given when the label has none | 1 | 2 |
+| Median latency | 14.3 s | **7.2 s** |
+| Tokens | 69,001 | **26,608** |
+
+**Result: this run does not show that FAIR is better than using Muse Spark directly. Direct Muse Spark did better on verdicts, prices and totals.** Where FAIR lost:
+- **CX-01:** a check downgraded the model's correct MATCH to UNKNOWN.
+- **CX-04:** two billing options in one offer; FAIR answered UNKNOWN and withheld the price.
+- **CX-05:** a required add-on; FAIR's verdict was right, but it withheld the 12-month total.
+- **CX-06, CX-07, CX-09 (Arabic):** verdicts right, but the checks rejected the riyal price, so no total was shown.
+- **CX-10 (mixed):** the terms state both monthly and yearly billing. FAIR answered CONTRADICTION; the label is UNKNOWN.
+- **CX-12 (mixed):** FAIR showed a 12-month total of 0 where the label gives none.
+
+Twelve synthetic cases and one run per system are too few to generalise in either direction. Run folder `20261102T184538Z_comparison_v2_muse-spark-1.3`, `outputs.jsonl` SHA-256 `2797193b2d008cd51e9efe154c8b0cd1d4808c9d624e925c398ec48cc86b5a71`, code SHA-256 `c8d285cb15c13ca3922d776ac59e42051949c6e6c603c2a61b50f93dcf3d5726`. FAIR's code has not changed since.
+
 ## Not yet done
 
-- The Test split, including all mixed-language cases.
+- The Test split, including all its mixed-language cases.
 - Any real published offer, or long terms.
-- Comparison with direct Muse Spark.
+- A comparison against independently reviewed labels.
 - Claim-level gold labels; claim quality was reviewed manually by the author.
 - Repeat runs to measure how much answers vary.
 - Native-speaker review of Arabic output.
+
+## What FAIR's checks changed in saved outputs
+
+All 48 saved model outputs (18 on Prompt v4, 30 on Prompt v5) were replayed through FAIR's current code. No model request was made.
+
+| Measure | Result |
+|---|---|
+| Overall verdict changed by a check | **1 of 48:** FAIR-012 on Prompt v4, where the model answered MATCH on "the price will never change". FAIR shows UNKNOWN. **0 of 30 on Prompt v5.** |
+| Claim quotes that failed verification | **0 of 44.** The model invented no quote in these runs. |
+| Extracted values rejected | 10 of 48 outputs, all the same field (`intro_periods`). This looks like strictness, not caught mistakes. |
+
+**On these short synthetic cases, FAIR's checks have rarely been tested by a real error.** This does not show that they add value beyond the model. In the [comparison with direct Muse Spark](#comparison-with-direct-muse-spark), the checks changed one verdict, and that change was wrong.
 
 ## Later change to cost totals
 

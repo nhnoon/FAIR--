@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:replay": "vite --mode replay",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run"

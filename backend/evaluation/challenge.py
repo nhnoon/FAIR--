@@ -14,7 +14,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any
 
-from app.evidence import verify_quote
+from app.evidence import _NUMBER, normalize, verify_quote
 from app.meta_client import parse_json_object
 from app.money import parse_money
 
@@ -22,6 +22,9 @@ CHALLENGE_DIR = Path(__file__).resolve().parent / "challenge"
 INPUTS_PATH = CHALLENGE_DIR / "challenge_v1_inputs.json"
 GOLD_PATH = CHALLENGE_DIR / "challenge_v1_gold_DRAFT.json"
 MANIFEST_PATH = CHALLENGE_DIR / "challenge_v1_manifest.json"
+V2_INPUTS_PATH = CHALLENGE_DIR / "challenge_v2_inputs.json"
+V2_GOLD_PATH = CHALLENGE_DIR / "challenge_v2_gold_DRAFT.json"
+V2_MANIFEST_PATH = CHALLENGE_DIR / "challenge_v2_manifest.json"
 VERDICTS = ("MATCH", "CONTRADICTION", "UNKNOWN")
 
 # Frozen. Neutral on purpose: no FAIR rules about promises, silence or injection. It asks for the same
@@ -82,6 +85,9 @@ class Normalized:
     latency_ms: int | None = None
     total_tokens: int | None = None
     error: str | None = None
+    # FAIR only: the model's own answer and what the checks removed, so their effect is measured apart from Prompt v5.
+    model_verdict: str | None = None
+    rejected_by_checks: int = 0
 
 
 def normalize_fair(response: dict) -> Normalized:
@@ -90,7 +96,10 @@ def normalize_fair(response: dict) -> Normalized:
     claims_summary = response.get("claims_summary") or {}
     decisive = [c["evidence"]["quote"] for c in response.get("claims", []) if c["verdict"] != "UNKNOWN" and (c.get("evidence") or {}).get("verified")]
     total = next((h.get("total") for h in keep.get("horizons", []) if h["months"] == 12 and h["status"] != "unavailable"), None)
+    unverified = [c for c in response.get("claims", []) if (c.get("evidence") or {}).get("quote") and not c["evidence"].get("verified")]
     return Normalized(
+        model_verdict=response.get("model_verdict") or response["verdict"],
+        rejected_by_checks=len(unverified) + len(response.get("rejected_facts") or []),
         verdict=claims_summary.get("overall") or response["verdict"],
         quotes=decisive,
         recurring_price=terms.get("recurring_price"),
@@ -123,19 +132,36 @@ def normalize_direct(text: str) -> Normalized:
     )
 
 
+def _stated(value: Any) -> Any:
+    """Words with no number ("none", "not established") state no amount."""
+    return None if isinstance(value, str) and not _NUMBER.search(normalize(value)) else value
+
+
 def _amount(value: Any) -> Decimal | None:
+    """The one amount in an answer, however it is worded. Several numbers need a person: see _needs_review."""
     if value is None:
         return None
     try:
         return parse_money(value).amount
     except (ValueError, InvalidOperation, ArithmeticError):
-        return None
+        pass
+    numbers = _NUMBER.findall(normalize(value)) if isinstance(value, str) else []
+    return Decimal(numbers[0].replace(",", "")) if len(numbers) == 1 else None
+
+
+def _needs_review(*values: Any) -> bool:
+    return any(_stated(v) is not None and _amount(v) is None for v in values)
 
 
 def _same_amount(found: Any, gold: Any) -> bool:
+    found = _stated(found)
     if gold is None:
         return found is None
     return _amount(found) == Decimal(str(gold))
+
+
+def _period(value: Any) -> str:
+    return str(value).strip().lower() if value else "unknown"
 
 
 def _overlaps(a: tuple[int, int], b: tuple[int, int]) -> bool:
@@ -149,7 +175,9 @@ def score_case(case: dict, gold: dict, answer: Normalized) -> dict[str, Any]:
     verbatim = [q for q in verified if q.verified]
     accepted = [verify_quote(q, terms) for q in gold["accepted_evidence"]]
     decisive = answer.verdict in ("MATCH", "CONTRADICTION")
-    cost, money = gold["cost"], [_amount(f) for f in answer.one_time_fees]
+    fees = [f for f in map(_stated, answer.one_time_fees) if f is not None]
+    cost, money = gold["cost"], [_amount(f) for f in fees]
+    total = _stated(answer.total_12_months)
     return {
         "case_id": case["case_id"],
         "language": case["language"],
@@ -166,12 +194,19 @@ def score_case(case: dict, gold: dict, answer: Normalized) -> dict[str, Any]:
         "quotes_total": len(verified),
         "quote_hits_accepted": any(_overlaps((q.start, q.end), (g.start, g.end)) for q in verbatim for g in accepted) if accepted else None,
         "recurring_price_correct": _same_amount(answer.recurring_price, cost["recurring_price"]),
-        "billing_correct": answer.billing_period == cost["billing_period"],
+        "billing_correct": answer.status == "ok" and _period(answer.billing_period) == cost["billing_period"],
         "intro_price_correct": _same_amount(answer.intro_price, cost["intro_price"]),
         "fees_correct": sorted(m for m in money if m is not None) == sorted(Decimal(str(f)) for f in cost["one_time_fees"]) and None not in money,
         "total_correct": _same_amount(answer.total_12_months, cost["total_12_months"]) if answer.status == "ok" else False,
-        "total_unsupported": cost["total_12_months"] is None and answer.total_12_months is not None,
-        "total_withheld_wrongly": cost["total_12_months"] is not None and answer.total_12_months is None,
+        "total_unsupported": cost["total_12_months"] is None and total is not None,
+        "total_withheld_wrongly": cost["total_12_months"] is not None and total is None,
+        # A person decides these: the answer states an amount the scorer cannot read as one number.
+        "money_needs_review": _needs_review(answer.recurring_price, answer.intro_price, total, *fees),
+        "model_verdict_correct": answer.model_verdict == gold["verdict"] if answer.model_verdict else None,
+        "verdict_changed_by_checks": bool(answer.model_verdict and answer.model_verdict != answer.verdict),
+        "rejected_by_checks": answer.rejected_by_checks,
+        # Certain where the terms do not settle it, certain with no real quote, or a total nothing establishes.
+        "unsupported_certainty": (decisive and (gold["verdict"] == "UNKNOWN" or not verbatim)) or (cost["total_12_months"] is None and total is not None),
         "latency_ms": answer.latency_ms,
         "total_tokens": answer.total_tokens,
     }
@@ -193,7 +228,12 @@ def summarize(scores: list[dict]) -> dict[str, Any]:
         "cases": n,
         "errors": sum(s["status"] != "ok" for s in scores),
         "verdict_accuracy": _rate(count("correct"), n),
+        "verdict_accuracy_before_checks": _rate(sum(s["model_verdict_correct"] is True for s in scores), sum(s["model_verdict_correct"] is not None for s in scores)),
+        "verdicts_changed_by_checks": count("verdict_changed_by_checks"),
+        "values_rejected_by_checks": sum(s["rejected_by_checks"] for s in scores),
+        "money_answers_for_human_review": count("money_needs_review"),
         "false_reassurance": _rate(count("false_reassurance"), not_match),
+        "unsupported_certainty": _rate(count("unsupported_certainty"), n),
         "false_contradiction": count("false_contradiction"),
         "false_unknown": count("false_unknown"),
         "decisive_without_verbatim_quote": _rate(count("decisive_without_verbatim_quote"), decisive),

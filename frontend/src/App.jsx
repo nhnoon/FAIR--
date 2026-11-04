@@ -4,8 +4,10 @@ import AboutView from './components/AboutView.jsx'
 import AnalyzeForm from './components/AnalyzeForm.jsx'
 import AppShell, { VIEWS } from './components/AppShell.jsx'
 import ErrorBanner from './components/ErrorBanner.jsx'
+import HomeView from './components/HomeView.jsx'
 import ResultsView from './components/ResultsView.jsx'
 import { ArrowIcon, Spinner } from './components/icons.jsx'
+import { findExample } from './examples/index.js'
 import { useLang } from './i18n/LanguageContext.jsx'
 
 /** Client-side checks mirroring backend AnalyzeRequest. Returns {field: {key, vars}}. */
@@ -20,7 +22,7 @@ export function validate({ terms, expectation }) {
   return errors
 }
 
-// Views live in the URL hash (#/analyze, #/results, #/about): no reload, back button works,
+// Views live in the URL hash (#/home, #/analyze, #/results, #/about): no reload, back button works,
 // no routing dependency. State lives here, so switching views never loses input or results.
 function viewFromHash() {
   const m = window.location.hash.match(/^#\/([a-z]+)$/)
@@ -29,21 +31,25 @@ function viewFromHash() {
 
 export default function App({ analyze = analyzeOffer }) {
   const { t, lang } = useLang()
-  const [view, setView] = useState(() => (viewFromHash() === 'about' ? 'about' : 'analyze'))
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [view, setView] = useState(() => {
+    const initial = viewFromHash()
+    if (initial === 'results') return 'analyze' // nothing to show yet in a fresh session
+    return initial || 'home'
+  })
   const [terms, setTerms] = useState('')
   const [expectation, setExpectation] = useState('')
   const [errorKeys, setErrorKeys] = useState({}) // field -> {key, vars} so messages re-translate on language switch
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [result, setResult] = useState(null) // { kind: 'live' | 'preview', id, data, terms, expectation }
-  const [health, setHealth] = useState({ status: 'checking', model: null })
+  const [status, setStatus] = useState('checking')
   const abortRef = useRef(null)
   const termsRef = useRef(null)
   const expectationRef = useRef(null)
   const headingRef = useRef(null)
   const resultRef = useRef(null)
   const firstRender = useRef(true)
+  const mounted = useRef(false)
   resultRef.current = result
 
   const go = useCallback((next) => {
@@ -81,15 +87,20 @@ export default function App({ analyze = analyzeOffer }) {
   }, [view, result])
 
   // Truthful system status. Configuration only; it never claims a call succeeded.
-  useEffect(() => {
-    let active = true
-    getHealth().then((h) => {
-      if (active) setHealth({ status: liveStatus(h), model: h?.model ?? null })
+  const checkHealth = useCallback(() => {
+    setStatus('checking')
+    return getHealth().then((h) => {
+      if (mounted.current) setStatus(liveStatus(h))
     })
-    return () => {
-      active = false
-    }
   }, [])
+
+  useEffect(() => {
+    mounted.current = true
+    checkHealth()
+    return () => {
+      mounted.current = false
+    }
+  }, [checkHealth])
 
   useEffect(() => () => abortRef.current?.abort(), [])
 
@@ -112,6 +123,29 @@ export default function App({ analyze = analyzeOffer }) {
     }
   }, [go])
 
+  // Always labelled as saved. It works with no server, because the result was stored at build time.
+  function openSaved(id) {
+    const ex = findExample(id)
+    setTerms(ex.terms)
+    setExpectation(ex.expectation)
+    setErrorKeys({})
+    setError(null)
+    setResult({ kind: 'saved', id: `saved-${id}-${Date.now()}`, data: ex.response, terms: ex.terms, expectation: ex.expectation })
+    resultRef.current = true
+    go('results')
+  }
+
+  // A running server analyses it for real (replay answers from its saved outputs). Otherwise, open the saved result.
+  function chooseExample(id) {
+    if (status !== 'replay' && status !== 'live') return openSaved(id)
+    const ex = findExample(id)
+    setTerms(ex.terms)
+    setExpectation(ex.expectation)
+    setErrorKeys({})
+    setError(null)
+    return undefined
+  }
+
   async function submit() {
     const payload = { terms: terms.trim(), expectation: expectation.trim(), language: lang }
     const keys = validate(payload)
@@ -133,8 +167,11 @@ export default function App({ analyze = analyzeOffer }) {
       resultRef.current = true
       go('results')
     } catch (e) {
-      const err = e instanceof ApiError ? e : new ApiError('unknown')
+      let err = e instanceof ApiError ? e : new ApiError('unknown')
+      // The replay server answers only its saved cases; say that, not that a service is down.
+      if (status === 'replay' && err.code === 'model_unavailable') err = new ApiError('replay_unsupported')
       if (err.code === 'cancelled') return
+      if (err.code === 'network') checkHealth()
       if (err.code === 'invalid_request' && Array.isArray(err.details)) {
         const serverKeys = {}
         err.details.forEach((d) => {
@@ -159,18 +196,17 @@ export default function App({ analyze = analyzeOffer }) {
       view={view}
       onNavigate={go}
       hasResult={!!result}
-      status={health.status}
-      drawerOpen={drawerOpen}
-      setDrawerOpen={setDrawerOpen}
+      status={status}
     >
+      {view === 'home' ? <HomeView ref={headingRef} onStart={() => go('analyze')} onOpenExample={openSaved} /> : null}
+
       {view === 'analyze' ? (
-        <div className="space-y-5" data-testid="view-analyze">
-          <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="page max-w-3xl space-y-6 pb-16 pt-8 sm:pt-12" data-testid="view-analyze">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
-              <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-fg focus:outline-none">
+              <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-semibold tracking-tight text-fg focus:outline-none sm:text-4xl">
                 {t('analyze.title')}
               </h1>
-              <p className="mt-1 text-muted">{t('analyze.subtitle')}</p>
             </div>
             {result ? (
               <button type="button" onClick={() => go('results')} className="btn-ghost text-link">
@@ -196,17 +232,19 @@ export default function App({ analyze = analyzeOffer }) {
             }}
             termsRef={termsRef}
             expectationRef={expectationRef}
-            status={health.status}
-            model={health.model}
+            status={status}
+            onRetryConnection={checkHealth}
+            onOpenExample={openSaved}
+            onChooseExample={chooseExample}
           />
 
           <div aria-live="polite" aria-busy={loading} className="space-y-4">
             {error ? <ErrorBanner error={error} onRetry={submit} onDismiss={() => setError(null)} /> : null}
             {loading ? (
-              <div className="card flex items-center gap-4 p-5" data-testid="loading">
+              <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-4" data-testid="loading">
                 <Spinner className="text-link" width={24} height={24} />
                 <div>
-                  <p className="font-semibold text-fg">{t('states.loadingTitle')}</p>
+                  <p className="font-medium text-fg">{t('states.loadingTitle')}</p>
                   <p className="text-sm text-muted">{t('states.loadingBody')}</p>
                 </div>
               </div>
@@ -222,6 +260,12 @@ export default function App({ analyze = analyzeOffer }) {
             key={result?.id || 'empty'}
             result={result}
             onEdit={() => go('analyze')}
+            onNew={() => {
+              setTerms('')
+              setExpectation('')
+              setErrorKeys({})
+              go('analyze')
+            }}
             onClosePreview={() => {
               setResult(null)
               resultRef.current = null

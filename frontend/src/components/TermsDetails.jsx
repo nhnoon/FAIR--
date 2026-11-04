@@ -32,7 +32,7 @@ function Row({ label, children, evidenceId, onShowEvidence }) {
   return (
     <div className="flex flex-col gap-1 border-b border-line py-3 last:border-b-0 sm:flex-row sm:items-start sm:gap-4">
       <dt className="text-sm font-medium text-muted sm:w-48 sm:shrink-0">{label}</dt>
-      <dd className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-2 text-[15px] font-semibold text-fg">
+      <dd className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-2 text-[15px] font-medium text-fg">
         <span className="min-w-0 break-words">{children}</span>
         <QuoteButton evidenceId={evidenceId} fieldLabel={label} onShowEvidence={onShowEvidence} />
       </dd>
@@ -93,14 +93,13 @@ export default function TermsDetails({ data, onShowEvidence }) {
   ]
 
   return (
-    <section aria-labelledby="details-heading" className="card">
+    <section aria-labelledby="details-heading">
       <details className="group" data-testid="details-disclosure">
-        <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-5 py-4 sm:px-6">
+        <summary className="flex min-h-[60px] cursor-pointer list-none items-center justify-between gap-3 rounded-lg px-5 sm:px-6">
           <span className="min-w-0">
-            <h2 id="details-heading" className="section-title">
+            <h2 id="details-heading" className="text-base font-semibold text-fg">
               {t('details.heading')}
             </h2>
-            <span className="block text-sm text-muted">{t('details.subtitle')}</span>
           </span>
           <ChevronIcon width={18} height={18} className="shrink-0 text-muted transition-transform group-open:rotate-180" />
         </summary>

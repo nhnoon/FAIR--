@@ -2,15 +2,16 @@ import { useMemo, useState } from 'react'
 import { lookup, useLang } from '../i18n/LanguageContext.jsx'
 import { collectEvidence, factEvidenceId, sourceFieldEvidenceId } from '../lib/evidence.js'
 import { addDays, formatDate, formatMoney, plural, pluralFrom, quote } from '../lib/format.js'
+import Chapter from './Chapter.jsx'
 import { ProvenanceTag } from './Provenance.jsx'
-import { AlertIcon, CheckIcon, MinusIcon, QuoteIcon } from './icons.jsx'
+import { AlertIcon, CheckIcon, MinusIcon } from './icons.jsx'
 
 // Every amount shown here comes from the backend (Decimal). React only formats it.
 const HORIZONS = [1, 3, 12]
 const STATUS = {
-  complete: { cls: 'bg-subtle text-fg ring-line', Icon: CheckIcon, key: 'cost.status.complete' },
-  conditional: { cls: 'bg-unknown-bg text-unknown-fg ring-unknown-line', Icon: AlertIcon, key: 'cost.status.conditional' },
-  unavailable: { cls: 'bg-subtle text-muted ring-line', Icon: MinusIcon, key: 'cost.status.unavailable' },
+  complete: { cls: 'text-muted', Icon: CheckIcon, key: 'cost.status.complete' },
+  conditional: { cls: 'text-unknown-fg', Icon: AlertIcon, key: 'cost.status.conditional' },
+  unavailable: { cls: 'text-muted', Icon: MinusIcon, key: 'cost.status.unavailable' },
 }
 
 function StatusChip({ status }) {
@@ -29,7 +30,6 @@ function SourceButton({ evidenceId, label, onShowEvidence }) {
   if (!evidenceId) return null
   return (
     <button type="button" className="text-link-btn" onClick={() => onShowEvidence(evidenceId)} aria-label={t('receipt.showEvidence', { item: label })}>
-      <QuoteIcon width={12} height={12} />
       {t('provenance.terms')}
     </button>
   )
@@ -50,7 +50,7 @@ function Deadline({ deadline, verifiedIds, onShowEvidence, today }) {
   // Rounded down to a whole day so the shown date is never later than the backend's safe moment.
   const lastSafeDay = deadline.last_safe_hour != null ? Math.floor(deadline.last_safe_hour / 24) : null
   return (
-    <div className="rounded-lg bg-subtle p-3" data-testid="receipt-deadline">
+    <div className="border-s-2 border-fg ps-3" data-testid="receipt-deadline">
       <p className="text-xs font-medium text-muted">{t('receipt.deadline')}</p>
       <p className="mt-0.5 text-sm font-semibold text-fg">{text}</p>
       {lastSafeDay != null ? (
@@ -89,12 +89,12 @@ function PathReceipt({ scenario, months, data, verifiedIds, onShowEvidence, toda
   return (
     <section
       aria-labelledby={`path-${scenario.key}`}
-      className="flex min-w-0 flex-col rounded-xl border border-line bg-surface p-4"
+      className="flex min-w-0 flex-col rounded-2xl border border-line p-4"
       data-testid={`receipt-${scenario.key}`}
       data-status={status}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 id={`path-${scenario.key}`} className="font-semibold text-fg">
+        <h3 id={`path-${scenario.key}`} className="font-medium text-fg">
           {t(`receipt.${scenario.key}`)}
         </h3>
         <StatusChip status={status} />
@@ -130,7 +130,7 @@ function PathReceipt({ scenario, months, data, verifiedIds, onShowEvidence, toda
                       ) : null}
                       <SourceButton evidenceId={verifiedIds.has(evidenceId) ? evidenceId : null} label={lineLabel(ln)} onShowEvidence={onShowEvidence} />
                     </span>
-                    <bdi className="shrink-0 text-sm font-semibold tabular-nums text-fg">{money(ln.amount)}</bdi>
+                    <bdi className="shrink-0 text-sm font-medium tabular-nums text-fg">{money(ln.amount)}</bdi>
                   </li>
                 )
               })}
@@ -139,10 +139,10 @@ function PathReceipt({ scenario, months, data, verifiedIds, onShowEvidence, toda
             <p className="mt-3 text-sm text-muted">{t('receipt.noLines')}</p>
           ) : null}
 
-          <div className="mt-auto border-t-2 border-dashed border-line pt-3">
+          <div className="mt-auto border-t border-dashed border-muted/50 pt-3">
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-sm font-medium text-muted">{t('receipt.total', { months: plural(lang, 'month', months) })}</span>
-              <bdi className="text-xl font-bold tabular-nums text-fg" data-testid={`receipt-total-${scenario.key}`}>
+              <bdi className="text-xl font-semibold tabular-nums text-fg" data-testid={`receipt-total-${scenario.key}`}>
                 {h && h.total != null && h.status !== 'unavailable' ? money(h.total) : '—'}
               </bdi>
             </div>
@@ -206,15 +206,11 @@ export default function FutureReceipt({ data, onShowEvidence, today = new Date()
   }
 
   return (
-    <section aria-labelledby="receipt-heading" className="card p-5 sm:p-6" data-testid="future-receipt">
-      <h2 id="receipt-heading" className="section-title">
-        {t('receipt.title')}
-      </h2>
-      <p className="mt-0.5 text-sm text-muted">{t('receipt.subtitle')}</p>
+    <Chapter id="receipt-heading" title={t('receipt.title')} testId="future-receipt">
 
       {withheld.length ? (
-        <div className="mt-4 rounded-xl border border-unknown-line bg-unknown-bg p-4 text-sm text-fg" data-testid="projection-withheld">
-          <p className="font-semibold text-unknown-fg">{t('receipt.withheld.title')}</p>
+        <div className="mb-6 border-s-2 border-unknown-solid ps-4 text-sm text-fg" data-testid="projection-withheld">
+          <p className="font-medium text-fg">{t('receipt.withheld.title')}</p>
           <ul className="mt-2 space-y-2">
             {withheld.map((w) => (
               <li key={`${w.code}-${w.amount}-${w.rate}`} className="min-w-0">
@@ -236,10 +232,10 @@ export default function FutureReceipt({ data, onShowEvidence, today = new Date()
         </div>
       ) : null}
 
-      <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl bg-subtle p-3">
-          <dt className="text-xs font-medium text-muted">{t(timingAssumed ? 'cost.dueExpected' : 'cost.dueAtSignup')}</dt>
-          <dd className="mt-0.5 font-semibold text-fg" data-testid="due-now">
+      <dl className="grid gap-5 sm:grid-cols-2 sm:gap-8">
+        <div className="min-w-0">
+          <dt className="text-xs text-muted">{t(timingAssumed ? 'cost.dueExpected' : 'cost.dueAtSignup')}</dt>
+          <dd className="mt-0.5 font-medium text-fg" data-testid="due-now">
             {cost.due_at_signup != null ? <bdi>{money(cost.due_at_signup)}</bdi> : <span className="font-medium text-muted">{t('cost.unknownValue')}</span>}
           </dd>
           {timingAssumed ? (
@@ -249,27 +245,27 @@ export default function FutureReceipt({ data, onShowEvidence, today = new Date()
             </dd>
           ) : null}
         </div>
-        <div className="rounded-xl bg-subtle p-3">
-          <dt className="text-xs font-medium text-muted">{t('cost.firstCharge')}</dt>
-          <dd className="mt-0.5 font-semibold text-fg" data-testid="next-charge">
+        <div className="min-w-0">
+          <dt className="text-xs text-muted">{t('cost.firstCharge')}</dt>
+          <dd className="mt-0.5 font-medium text-fg" data-testid="next-charge">
             {next}
           </dd>
         </div>
       </dl>
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <span className="text-sm font-medium text-fg" id="horizon-label">
+      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span className="sr-only" id="horizon-label">
           {t('receipt.horizon')}
         </span>
-        <div role="group" aria-labelledby="horizon-label" className="inline-flex rounded-full border border-line bg-subtle p-0.5" data-testid="horizon-switch">
+        <div role="group" aria-labelledby="horizon-label" className="inline-flex gap-5 border-b border-line" data-testid="horizon-switch">
           {HORIZONS.map((m) => (
             <button
               key={m}
               type="button"
               aria-pressed={months === m}
               onClick={() => setMonths(m)}
-              className={`min-h-[36px] rounded-full px-3.5 text-sm font-semibold transition-colors ${
-                months === m ? 'bg-primary text-primary-fg' : 'text-muted hover:text-fg'
+              className={`-mb-px min-h-[40px] border-b-2 text-sm font-medium transition-colors ${
+                months === m ? 'border-fg text-fg' : 'border-transparent text-muted hover:text-fg'
               }`}
             >
               {plural(lang, 'month', m)}
@@ -284,8 +280,8 @@ export default function FutureReceipt({ data, onShowEvidence, today = new Date()
       </div>
 
       {notCounted.length ? (
-        <div className="mt-4 rounded-xl border border-unknown-line bg-unknown-bg p-4 text-sm" data-testid="amounts-not-counted">
-          <p className="font-semibold text-unknown-fg">{t('receipt.notCounted')}</p>
+        <div className="mt-5 border-s-2 border-unknown-solid ps-4 text-sm" data-testid="amounts-not-counted">
+          <p className="font-medium text-fg">{t('receipt.notCounted')}</p>
           <ul className="mt-2 space-y-2">
             {notCounted.map((n) => (
               <li key={`${n.amount}-${n.rate}`} className="min-w-0 text-fg">
@@ -300,7 +296,7 @@ export default function FutureReceipt({ data, onShowEvidence, today = new Date()
       ) : null}
 
       {diff ? (
-        <div className="mt-4 rounded-xl border border-line p-4" data-testid="receipt-difference">
+        <div className="mt-5" data-testid="receipt-difference">
           <p className="font-semibold text-fg">
             <bdi>{t('receipt.difference', { amount: money(diff.amount) })}</bdi>
           </p>
@@ -318,6 +314,6 @@ export default function FutureReceipt({ data, onShowEvidence, today = new Date()
           ))}
         </ul>
       ) : null}
-    </section>
+    </Chapter>
   )
 }

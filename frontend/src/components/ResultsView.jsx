@@ -1,149 +1,88 @@
-import { forwardRef, useState } from 'react'
-import { isReplayModel } from '../api/client.js'
+import { forwardRef, useMemo, useState } from 'react'
+import { isEarlierPromptReplay, isReplayModel } from '../api/client.js'
 import { useLang } from '../i18n/LanguageContext.jsx'
+import { overallVerdict } from '../lib/evidence.js'
 import { quote } from '../lib/format.js'
+import Chapter, { SectionsContext } from './Chapter.jsx'
 import CostBreakdown from './CostBreakdown.jsx'
-import DecisionReveal from './DecisionReveal.jsx'
+import DecisionReveal, { canReveal } from './DecisionReveal.jsx'
+import EvidenceViewer from './EvidenceViewer.jsx'
 import ExpectationMirror from './ExpectationMirror.jsx'
 import FutureReceipt from './FutureReceipt.jsx'
-import { ProvenanceTag } from './Provenance.jsx'
-import EvidenceViewer from './EvidenceViewer.jsx'
+import ResultCard from './ResultCard.jsx'
 import TermsDetails from './TermsDetails.jsx'
-import UncertaintyPanel from './UncertaintyPanel.jsx'
-import { AlertIcon, CheckIcon, FlaskIcon, QuestionIcon, QuoteIcon, ShieldIcon, XIcon } from './icons.jsx'
+import TrustAudit from './TrustAudit.jsx'
+import UncertaintyPanel, { hasUncertainty } from './UncertaintyPanel.jsx'
 
-// Each verdict has its own colour, icon and word, so colour is never the only signal.
-const VERDICT_STYLE = {
-  MATCH: { box: 'border-match-line bg-match-bg', icon: 'bg-match-solid', tag: 'text-match-fg', text: 'text-match-fg', mark: 'bg-match-line', Icon: CheckIcon },
-  CONTRADICTION: { box: 'border-contra-line bg-contra-bg', icon: 'bg-contra-solid', tag: 'text-contra-fg', text: 'text-contra-fg', mark: 'bg-contra-line', Icon: XIcon },
-  UNKNOWN: { box: 'border-unknown-line bg-unknown-bg', icon: 'bg-unknown-solid', tag: 'text-unknown-fg', text: 'text-unknown-fg', mark: 'bg-unknown-line', Icon: QuestionIcon },
-}
-
-function ModeBadge({ result }) {
+function ModeLine({ result }) {
   const { t } = useLang()
+  const { data } = result
   if (result.kind === 'preview') {
     return (
-      <span className="chip bg-unknown-bg text-unknown-fg ring-unknown-line" data-testid="preview-badge">
-        <FlaskIcon width={13} height={13} />
-        {t('preview.badge')}
-      </span>
+      <div className="rounded-xl bg-unknown-bg px-4 py-2.5 text-sm text-unknown-fg">
+        <p className="font-semibold" data-testid="preview-badge">{t('preview.badge')}</p>
+        <p>{t('preview.notice')}</p>
+      </div>
     )
   }
-  if (isReplayModel(result.data.model)) {
+  if (isReplayModel(data.model)) {
     return (
-      <span className="chip bg-unknown-bg text-unknown-fg ring-unknown-line" data-testid="replay-badge">
-        <FlaskIcon width={13} height={13} />
-        {t('replay.badge')}
-      </span>
+      <div className="rounded-xl bg-unknown-bg px-4 py-2.5 text-sm text-unknown-fg">
+        <p className="font-semibold" data-testid="replay-badge">{t('replay.badge')}</p>
+        <p data-testid="replay-notice">
+          {t(result.kind === 'saved' ? 'replay.savedNotice' : 'replay.notice')}
+          {isEarlierPromptReplay(data.model) ? <span className="mt-1 block font-medium" data-testid="earlier-prompt-notice">{t('replay.earlierPrompt')}</span> : null}
+        </p>
+      </div>
     )
   }
   return (
-    <span className="flex flex-wrap items-center gap-2">
-      <span className="chip bg-primary text-primary-fg ring-primary">
-        <ShieldIcon width={13} height={13} />
-        <span data-testid="live-badge">{t('live.badge')}</span>
-      </span>
-      <span className="text-xs text-muted">
-        {t('live.model', { model: result.data.model })}
-      </span>
-    </span>
+    <p className="text-xs text-muted">
+      <span className="font-medium text-fg" data-testid="live-badge">{t('live.badge')}</span> · <span>{t('live.model', { model: data.model })}</span>
+    </p>
   )
 }
 
-function VerdictCard({ data }) {
-  const { t, lang } = useLang()
-  // Overall = claim-by-claim result (CONTRADICTION if any claim is contradicted, UNKNOWN if any is unsettled).
-  const overall = data.claims_summary?.overall || data.verdict
-  const s = VERDICT_STYLE[overall]
-  return (
-    <section aria-labelledby="verdict-heading" className={`rounded-2xl border p-5 sm:p-6 ${s.box}`} data-testid="verdict" data-verdict={overall}>
-      <div className="flex items-start gap-4">
-        <span className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl text-on-solid ${s.icon}`}>
-          <s.Icon width={24} height={24} />
-        </span>
-        <div className="min-w-0">
-          <p className={`eyebrow ${s.tag}`}>{t('verdict.label')}</p>
-          <h2 id="verdict-heading" className={`mt-0.5 text-2xl font-bold leading-tight sm:text-3xl ${s.text}`}>
-            {t(`verdict.${overall}.tag`)}
-          </h2>
-          <p className={`mt-1 font-medium ${s.text}`}>{t(`verdict.${overall}.headline`)}</p>
-        </div>
-      </div>
-      <div className="mt-4 rounded-xl bg-surface/80 p-4">
-        <p className="text-xs font-semibold text-muted">{t('verdict.why')}</p>
-        <p className="mt-1 break-words leading-relaxed text-fg" lang={lang}>
-          {data.explanation[lang]}
-        </p>
-        <div className="mt-2">
-          <ProvenanceTag kind="ai" />
-        </div>
-      </div>
-      {data.verdict_downgraded ? (
-        <p className="mt-3 flex gap-2 rounded-xl bg-surface/80 p-3 text-sm text-unknown-fg" data-testid="downgraded">
-          <AlertIcon width={18} height={18} className="mt-0.5 shrink-0 text-unknown-fg" />
-          <span>{t('verdict.downgraded', { verdict: t(`verdict.words.${data.model_verdict}`) })}</span>
-        </p>
-      ) : null}
-    </section>
-  )
-}
-
-function CompareCard({ result, onShowQuote }) {
+function CompareDetail({ result, onShowQuote }) {
   const { t, lang } = useLang()
   const ev = result.data.verdict_evidence
   const verified = ev?.verified === true
-  const s = VERDICT_STYLE[result.data.verdict]
   return (
-    <section aria-labelledby="compare-heading" className="card p-5 sm:p-6" data-testid="comparison">
-      <h2 id="compare-heading" className="section-title">
-        {t('compare.title')}
-      </h2>
-      <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <div className="min-w-0 rounded-xl bg-subtle p-4">
-          <p className="text-xs font-semibold text-muted">{t('compare.youExpected')}</p>
-          <p dir="auto" className="mt-1.5 break-words font-medium text-fg">
-            {quote(result.expectation, lang)}
+    <Chapter id="compare-heading" title={t('compare.title')} testId="comparison">
+      <p className="text-xs font-medium text-muted">{t('compare.termsEstablish')}</p>
+      {verified ? (
+        <>
+          <p dir="auto" className="mt-1 break-words text-fg">
+            <mark className="rounded bg-mark px-1 text-fg">{quote(ev.quote, lang)}</mark>
           </p>
-        </div>
-        <div className="min-w-0 rounded-xl border border-line p-4">
-          <p className="text-xs font-semibold text-muted">{t('compare.termsEstablish')}</p>
-          {verified ? (
-            <>
-              <p dir="auto" className="mt-1.5 break-words font-medium text-fg">
-                <mark className={`rounded px-1 text-fg ${s.mark}`}>{quote(ev.quote, lang)}</mark>
-              </p>
-              <button
-                type="button"
-                onClick={onShowQuote}
-                className="mt-2 inline-flex min-h-[32px] items-center gap-1 rounded-md px-2 text-xs font-semibold text-link hover:bg-subtle"
-              >
-                <QuoteIcon width={14} height={14} />
-                {t('compare.showInSource')}
-              </button>
-            </>
-          ) : (
-            <p className="mt-1.5 text-sm text-muted" data-testid="no-deciding-quote">
-              {t('compare.noEvidence')}
-            </p>
-          )}
-        </div>
-      </div>
-    </section>
+          <button type="button" onClick={onShowQuote} className="text-link-btn mt-1">
+            {t('compare.showInSource')}
+          </button>
+        </>
+      ) : (
+        <p className="mt-1 text-sm text-muted" data-testid="no-deciding-quote">
+          {t('compare.noEvidence')}
+        </p>
+      )}
+    </Chapter>
   )
 }
 
-const ResultsView = forwardRef(function ResultsView({ result, onEdit, onClosePreview }, headingRef) {
+const ResultsView = forwardRef(function ResultsView({ result, onEdit, onNew, onClosePreview }, headingRef) {
   const { t } = useLang()
   const [activeId, setActiveId] = useState(null)
+  // A material limitation is never left closed: this row starts open whenever there is any uncertainty.
+  const [open, setOpenState] = useState(() => (result && hasUncertainty(result.data) ? { 'uncertain-heading': true } : {}))
+  const sections = useMemo(() => ({ isOpen: (id) => !!open[id], setOpen: (id, value) => setOpenState((s) => (!!s[id] === value ? s : { ...s, [id]: value })) }), [open])
 
   if (!result) {
     return (
-      <div className="card p-8 text-center" data-testid="results-empty">
-        <h1 ref={headingRef} tabIndex={-1} className="text-lg font-semibold text-fg focus:outline-none">
+      <div className="page py-20 text-center" data-testid="results-empty">
+        <h1 ref={headingRef} tabIndex={-1} className="text-3xl font-semibold tracking-tight text-fg focus:outline-none">
           {t('results.emptyTitle')}
         </h1>
-        <p className="mt-1 text-sm text-muted">{t('results.emptyBody')}</p>
-        <button type="button" className="btn-primary mt-5" onClick={onEdit}>
+        <p className="mt-2 text-muted">{t('results.emptyBody')}</p>
+        <button type="button" className="btn-primary mt-6" onClick={onEdit}>
           {t('results.goAnalyze')}
         </button>
       </div>
@@ -151,50 +90,79 @@ const ResultsView = forwardRef(function ResultsView({ result, onEdit, onClosePre
   }
 
   const { data } = result
+  const hasOptions = canReveal(data)
+  const jump = (id) => {
+    sections.setOpen(id, true)
+    requestAnimationFrame(() => document.getElementById(`section-${id}`)?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }))
+  }
+  const showEvidence = (id) => {
+    sections.setOpen('evidence-heading', true)
+    setActiveId(id)
+  }
+  const firstDetail = data.claims?.length ? 'mirror-heading' : 'compare-heading'
+
   return (
-    <article className="space-y-5" data-kind={result.kind} aria-labelledby="results-heading">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0 space-y-1.5">
-          <h1 id="results-heading" ref={headingRef} tabIndex={-1} className="text-2xl font-bold text-fg focus:outline-none">
-            {t('results.title')}
-          </h1>
-          <ModeBadge result={result} />
-        </div>
-        <div className="flex gap-2">
-          {result.kind === 'preview' ? (
-            <button type="button" className="btn-ghost" onClick={onClosePreview}>
-              {t('preview.close')}
+    <SectionsContext.Provider value={sections}>
+      <article className="page space-y-5 pb-16 pt-5 sm:pt-6" data-kind={result.kind} aria-labelledby="results-heading">
+        <h1 id="results-heading" ref={headingRef} tabIndex={-1} className="sr-only">
+          {t('results.title')}
+        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="min-w-0 flex-1 basis-72">
+            <ModeLine result={result} />
+          </div>
+          <div className="flex shrink-0 gap-1">
+            {result.kind === 'preview' ? (
+              <button type="button" className="btn-ghost" onClick={onClosePreview}>
+                {t('preview.close')}
+              </button>
+            ) : null}
+            <button type="button" className="btn-ghost" onClick={onEdit}>
+              {t('results.editInputs')}
             </button>
-          ) : null}
-          <button type="button" className="btn-secondary" onClick={onEdit}>
-            {t('results.editInputs')}
-          </button>
+            <button type="button" className="btn-ghost" onClick={onNew}>
+              {t('results.newCheck')}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {result.kind === 'preview' ? (
-        <p className="rounded-xl border border-dashed border-unknown-line bg-unknown-bg px-4 py-3 text-sm text-unknown-fg">{t('preview.notice')}</p>
-      ) : null}
+        <section aria-labelledby="verdict-heading" data-testid="verdict" data-verdict={overallVerdict(data)} className="rise">
+          <ResultCard
+            data={data}
+            expectation={result.expectation}
+            onShowEvidence={showEvidence}
+            actions={
+              <>
+                {hasOptions ? (
+                  <button type="button" className="btn-primary flex-1 whitespace-nowrap" onClick={() => jump('reveal-heading')}>
+                    {t('result.explore')}
+                  </button>
+                ) : null}
+                <button type="button" className={`${hasOptions ? 'btn-secondary' : 'btn-primary'} flex-1 whitespace-nowrap`} onClick={() => jump(firstDetail)}>
+                  {t('result.details')}
+                </button>
+              </>
+            }
+          />
+        </section>
 
-      {isReplayModel(data.model) ? (
-        <p className="rounded-xl border border-dashed border-unknown-line bg-unknown-bg px-4 py-3 text-sm text-unknown-fg" data-testid="replay-notice">
-          {t('replay.notice')}
-        </p>
-      ) : null}
-
-      <VerdictCard data={data} />
-      <DecisionReveal key={result.id} data={data} onShowEvidence={setActiveId} />
-      {/* Older responses without claims/decision fall back to the previous cards. */}
-      {data.claims?.length ? (
-        <ExpectationMirror data={data} expectation={result.expectation} onShowEvidence={setActiveId} />
-      ) : (
-        <CompareCard result={result} onShowQuote={() => setActiveId('verdict')} />
-      )}
-      {data.decision ? <FutureReceipt data={data} onShowEvidence={setActiveId} /> : <CostBreakdown cost={data.cost} />}
-      <EvidenceViewer data={data} sourceText={result.terms} activeId={activeId} onActivate={setActiveId} />
-      <UncertaintyPanel data={data} />
-      <TermsDetails data={data} onShowEvidence={setActiveId} />
-    </article>
+        <div className="rounded-3xl border border-line bg-surface" data-testid="result-details">
+          {hasOptions ? <DecisionReveal key={result.id} data={data} onShowEvidence={showEvidence} /> : null}
+          {data.claims?.length ? <ExpectationMirror data={data} onShowEvidence={showEvidence} /> : <CompareDetail result={result} onShowQuote={() => showEvidence('verdict')} />}
+          {data.decision ? (
+            <FutureReceipt data={data} onShowEvidence={showEvidence} />
+          ) : (
+            <Chapter id="cost-detail-heading" title={t('receipt.title')}>
+              <CostBreakdown cost={data.cost} />
+            </Chapter>
+          )}
+          <EvidenceViewer data={data} sourceText={result.terms} activeId={activeId} onActivate={setActiveId} />
+          <UncertaintyPanel data={data} />
+          {data.claims?.length && result.kind !== 'preview' ? <TrustAudit data={data} /> : null}
+          <TermsDetails data={data} onShowEvidence={showEvidence} />
+        </div>
+      </article>
+    </SectionsContext.Provider>
   )
 })
 

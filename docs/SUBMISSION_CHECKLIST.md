@@ -50,8 +50,8 @@ Questions for the participant portal or organizers:
 - [x] Live connection verified; the key stays in the git-ignored `backend/.env`
 - [x] Development run on Prompt v5: 15/15 on synthetic cases, built on these cases
 - [x] Validation run on frozen Prompt v5: 15/15, Arabic 10/10, sharing templates with Development
-- [ ] One analysis in the real UI shows **Live analysis** with verified quotes (paid; needs approval)
-- [ ] Optional: reviewers label the challenge set, then run the comparison in `docs/COMPARISON_PROTOCOL.md` (paid; needs approval)
+- [x] One analysis in the real UI shows **Live analysis** with verified quotes (2026-11-03, 23.2 s, CONTRADICTION)
+- [x] Comparison in `docs/COMPARISON_PROTOCOL.md`, against author-draft labels: direct Muse Spark did better (2026-11-02)
 - [ ] Optional: a single Test run, the only mixed-language measurement (paid; needs approval)
 - [ ] Any number quoted publicly comes from `docs/EVALUATION.md`
 

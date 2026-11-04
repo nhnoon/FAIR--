@@ -20,7 +20,10 @@ export default {
         link: token('link'),
         mark: { DEFAULT: token('mark'), active: token('mark-active') },
         focus: token('focus'),
-        sidebar: { DEFAULT: token('sidebar'), fg: token('sidebar-fg'), muted: token('sidebar-muted'), active: token('sidebar-active') },
+        // The home hero, and the tinted block that anything quoted from the terms sits on.
+        ink: { DEFAULT: token('ink'), fg: token('ink-fg'), muted: token('ink-muted'), line: token('ink-line') },
+        paper: { DEFAULT: token('paper'), fg: token('paper-fg'), muted: token('paper-muted'), line: token('paper-line') },
+        hl: { match: token('hl-match'), contra: token('hl-contra'), unknown: token('hl-unknown') },
         // Verdict / status colours: kept separate from the navy brand.
         match: { bg: token('match-bg'), fg: token('match-fg'), line: token('match-line'), solid: token('match-solid') },
         contra: { bg: token('contra-bg'), fg: token('contra-fg'), line: token('contra-line'), solid: token('contra-solid') },
@@ -32,8 +35,8 @@ export default {
         arabic: ['"IBM Plex Sans Arabic"', 'Inter', 'system-ui', 'Tahoma', 'sans-serif'],
       },
       boxShadow: {
-        soft: '0 1px 2px rgba(8, 15, 30, 0.05), 0 4px 16px -8px rgba(8, 15, 30, 0.10)',
-        lift: '0 2px 4px rgba(8, 15, 30, 0.06), 0 18px 40px -20px rgba(8, 15, 30, 0.40)',
+        soft: '0 1px 2px rgba(9, 15, 29, 0.04)',
+        lift: '0 2px 4px rgba(9, 15, 29, 0.06), 0 24px 48px -24px rgba(9, 15, 29, 0.35)',
       },
     },
   },

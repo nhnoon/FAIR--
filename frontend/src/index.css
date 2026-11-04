@@ -12,29 +12,35 @@
 @tailwind utilities;
 
 /*
-  Design tokens (RGB channels). Brand = premium dark navy; status colours are separate:
-  match = green, contra = coral/red, unknown = amber. Contrast is checked by
-  src/test/tokens.test.js against WCAG thresholds for both themes.
+  Design tokens (RGB channels). Navy carries the brand; match, contra and unknown are reserved for verdicts.
+  Contrast is checked by src/test/tokens.test.js against WCAG thresholds for both themes.
 */
 @layer base {
   :root {
-    --c-bg: 245 247 250; /* #F5F7FA */
+    --c-bg: 244 246 250; /* #F4F6FA */
     --c-surface: 255 255 255; /* #FFFFFF */
-    --c-subtle: 238 242 247; /* #EEF2F7 */
-    --c-fg: 17 29 53; /* #111D35 */
-    --c-muted: 75 91 120; /* #4B5B78 */
-    --c-line: 220 227 237; /* #DCE3ED */
-    --c-primary: 17 29 53; /* #111D35 */
-    --c-primary-hover: 34 52 90; /* #22345A */
+    --c-subtle: 238 241 247; /* #EEF1F7 */
+    --c-fg: 11 22 48; /* #0B1630 */
+    --c-muted: 82 93 117; /* #525D75 */
+    --c-line: 222 227 237; /* #DEE3ED */
+    --c-primary: 16 34 80; /* #102250 */
+    --c-primary-hover: 28 52 112; /* #1C3470 */
     --c-on-primary: 255 255 255; /* #FFFFFF */
-    --c-link: 34 52 90; /* #22345A */
-    --c-mark: 225 232 243; /* #E1E8F3 */
-    --c-mark-active: 194 208 230; /* #C2D0E6 */
-    --c-focus: 17 29 53; /* #111D35 */
-    --c-sidebar: 17 29 53; /* #111D35 */
-    --c-sidebar-fg: 244 246 251; /* #F4F6FB */
-    --c-sidebar-muted: 168 181 204; /* #A8B5CC */
-    --c-sidebar-active: 41 63 103; /* #293F67 */
+    --c-link: 38 74 178; /* #264AB2 */
+    --c-mark: 224 232 250; /* #E0E8FA */
+    --c-mark-active: 190 207 245; /* #BECFF5 */
+    --c-focus: 38 74 178; /* #264AB2 */
+    --c-ink: 11 24 58; /* #0B183A */
+    --c-ink-fg: 244 246 251; /* #F4F6FB */
+    --c-ink-muted: 172 185 212; /* #ACB9D4 */
+    --c-ink-line: 40 58 100; /* #283A64 */
+    --c-paper: 245 247 251; /* #F5F7FB */
+    --c-paper-fg: 11 22 48; /* #0B1630 */
+    --c-paper-muted: 82 93 117; /* #525D75 */
+    --c-paper-line: 222 227 237; /* #DEE3ED */
+    --c-hl-match: 205 235 217; /* #CDEBD9 */
+    --c-hl-contra: 250 217 207; /* #FAD9CF */
+    --c-hl-unknown: 248 232 186; /* #F8E8BA */
     --c-match-bg: 236 248 241; /* #ECF8F1 */
     --c-match-fg: 20 83 45; /* #14532D */
     --c-match-line: 183 227 200; /* #B7E3C8 */
@@ -51,23 +57,30 @@
     color-scheme: light;
   }
   .dark {
-    --c-bg: 8 15 30; /* #080F1E */
-    --c-surface: 21 34 57; /* #152239 */
-    --c-subtle: 15 26 46; /* #0F1A2E */
-    --c-fg: 244 246 251; /* #F4F6FB */
-    --c-muted: 167 179 201; /* #A7B3C9 */
-    --c-line: 41 58 84; /* #293A54 */
-    --c-primary: 41 63 103; /* #293F67 */
-    --c-primary-hover: 52 80 127; /* #34507F */
-    --c-on-primary: 244 246 251; /* #F4F6FB */
-    --c-link: 185 199 226; /* #B9C7E2 */
-    --c-mark: 41 63 103; /* #293F67 */
-    --c-mark-active: 59 87 136; /* #3B5788 */
-    --c-focus: 220 227 237; /* #DCE3ED */
-    --c-sidebar: 11 20 38; /* #0B1426 */
-    --c-sidebar-fg: 244 246 251; /* #F4F6FB */
-    --c-sidebar-muted: 143 157 184; /* #8F9DB8 */
-    --c-sidebar-active: 28 44 74; /* #1C2C4A */
+    --c-bg: 7 12 26; /* #070C1A */
+    --c-surface: 15 24 44; /* #0F182C */
+    --c-subtle: 22 33 58; /* #16213A */
+    --c-fg: 240 243 250; /* #F0F3FA */
+    --c-muted: 165 176 199; /* #A5B0C7 */
+    --c-line: 36 48 77; /* #24304D */
+    --c-primary: 240 243 250; /* #F0F3FA */
+    --c-primary-hover: 214 221 236; /* #D6DDEC */
+    --c-on-primary: 11 22 48; /* #0B1630 */
+    --c-link: 150 178 250; /* #96B2FA */
+    --c-mark: 41 63 110; /* #293F6E */
+    --c-mark-active: 62 92 150; /* #3E5C96 */
+    --c-focus: 150 178 250; /* #96B2FA */
+    --c-ink: 11 20 44; /* #0B142C */
+    --c-ink-fg: 244 246 251; /* #F4F6FB */
+    --c-ink-muted: 172 185 212; /* #ACB9D4 */
+    --c-ink-line: 40 58 100; /* #283A64 */
+    --c-paper: 22 33 58; /* #16213A */
+    --c-paper-fg: 240 243 250; /* #F0F3FA */
+    --c-paper-muted: 165 176 199; /* #A5B0C7 */
+    --c-paper-line: 36 48 77; /* #24304D */
+    --c-hl-match: 28 84 56; /* #1C5438 */
+    --c-hl-contra: 106 44 30; /* #6A2C1E */
+    --c-hl-unknown: 98 72 16; /* #624810 */
     --c-match-bg: 15 42 31; /* #0F2A1F */
     --c-match-fg: 155 229 184; /* #9BE5B8 */
     --c-match-line: 30 90 60; /* #1E5A3C */
@@ -80,15 +93,17 @@
     --c-unknown-fg: 245 207 107; /* #F5CF6B */
     --c-unknown-line: 106 79 18; /* #6A4F12 */
     --c-unknown-solid: 199 126 10; /* #C77E0A */
-    --c-on-solid: 8 15 30; /* #080F1E: dark icons on the brighter dark-mode status fills */
+    --c-on-solid: 9 15 29; /* #090F1D: dark icons on the brighter dark-mode status fills */
     color-scheme: dark;
   }
 
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
   }
   body {
     @apply bg-bg text-fg font-sans antialiased;
+    overflow-wrap: anywhere;
   }
   html[lang='ar'] body {
     @apply font-arabic;
@@ -102,7 +117,7 @@
     letter-spacing: 0 !important;
   }
   :focus-visible {
-    @apply outline-none ring-2 ring-focus ring-offset-2 ring-offset-surface;
+    @apply outline-none ring-2 ring-focus ring-offset-2 ring-offset-bg;
   }
   /* Headings/regions focused programmatically after navigation (tabindex=-1) are not
      interactive controls: move screen-reader focus there without drawing a ring. */
@@ -112,45 +127,72 @@
     box-shadow: none;
   }
   ::placeholder {
-    @apply text-muted opacity-80;
+    @apply text-muted opacity-70;
   }
 }
 
 @layer components {
+  .page {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
   .card {
-    @apply rounded-2xl border border-line bg-surface shadow-soft;
+    @apply rounded-2xl border border-line bg-surface;
   }
   .btn {
-    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60;
   }
   .btn-primary {
     @apply btn bg-primary text-primary-fg hover:bg-primary-hover;
   }
   .btn-secondary {
-    @apply btn border border-line bg-surface text-fg hover:bg-subtle;
+    @apply btn border border-line bg-transparent text-fg hover:bg-subtle;
   }
   .btn-ghost {
     @apply btn text-fg hover:bg-subtle;
   }
+  .btn-cta {
+    @apply min-h-[52px] px-7 text-base;
+  }
   .label {
-    @apply block text-sm font-semibold text-fg;
+    @apply block text-sm font-medium text-fg;
   }
   .field {
-    @apply block w-full rounded-xl border border-line bg-subtle px-3.5 py-3 text-[15px] text-fg focus:border-focus focus:bg-surface focus:outline-none focus:ring-2 focus:ring-focus/25;
+    @apply block w-full rounded-xl border border-line bg-surface px-4 py-3.5 text-base text-fg transition-colors focus:border-focus focus:outline-none focus:ring-2 focus:ring-focus/25;
   }
   .field-invalid {
     @apply border-contra-solid focus:border-contra-solid focus:ring-contra-solid/25;
   }
   .eyebrow {
-    @apply text-xs font-semibold uppercase tracking-[0.14em];
+    @apply text-xs font-medium uppercase tracking-[0.12em];
   }
   .section-title {
     @apply text-lg font-semibold text-fg;
   }
+  .h-sub {
+    @apply text-sm font-medium text-fg;
+  }
   .chip {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1;
+    @apply inline-flex items-center gap-1.5 text-xs font-medium;
   }
   .text-link-btn {
-    @apply inline-flex min-h-[32px] items-center gap-1 rounded-md px-2 text-xs font-semibold text-link underline-offset-2 hover:bg-subtle hover:underline;
+    @apply inline-flex min-h-[32px] items-center gap-1 rounded-md text-xs font-medium text-link underline-offset-4 hover:underline;
+  }
+  .quote-text {
+    @apply text-[15px] font-medium leading-relaxed;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise {
+    animation: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  details[open] > div {
+    animation: rise 0.2s ease-out both;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 }

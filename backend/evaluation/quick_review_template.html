@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Owner quick review</title>
+<style>
+:root { --bg:#f6f7f9; --card:#fff; --fg:#1b2430; --muted:#5a6675; --line:#cfd6df; --accent:#1f4f8f; --accent-fg:#fff; --warn-bg:#fff4dc; --warn-fg:#6f4a00; }
+@media (prefers-color-scheme: dark) { :root { --bg:#12171e; --card:#1b222c; --fg:#e8ecf1; --muted:#a4afbd; --line:#39434f; --accent:#8db8ef; --accent-fg:#12171e; --warn-bg:#3a2f15; --warn-fg:#efcd85; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif; }
+main { max-width:680px; margin:auto; padding:16px; }
+.notice { background:var(--warn-bg); color:var(--warn-fg); border-radius:8px; padding:8px 12px; font-size:.9rem; font-weight:600; }
+.row { display:flex; justify-content:space-between; align-items:center; gap:12px; margin:14px 0 6px; font-weight:600; }
+.track { height:8px; background:var(--line); border-radius:4px; overflow:hidden; }
+.fill { height:100%; width:0; background:var(--accent); }
+.card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin:14px 0; }
+.label { margin:0 0 4px; color:var(--muted); font-size:.88rem; font-weight:600; }
+.source { font-size:1.1rem; margin:0 0 16px; overflow-wrap:anywhere; }
+.choices { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+button { font:inherit; font-weight:600; min-height:48px; padding:8px 12px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--fg); cursor:pointer; }
+.choices button[aria-pressed=true] { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+.choices small { display:block; font-weight:400; }
+.nav { display:flex; justify-content:space-between; gap:10px; margin-top:14px; }
+.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+button:disabled { opacity:.45; cursor:default; }
+details { margin-top:14px; } summary { cursor:pointer; font-weight:600; min-height:32px; }
+label { display:block; font-weight:600; font-size:.92rem; margin-top:10px; }
+textarea, input { width:100%; padding:8px; margin-top:3px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--fg); font:inherit; }
+.muted { color:var(--muted); font-size:.9rem; } [hidden] { display:none; }
+</style>
+</head>
+<body>
+<main>
+<p class="notice">Owner review: not independently validated. · مراجعة المالك: ليست تحققًا مستقلًا.</p>
+<div class="row"><span id="progress" aria-live="polite"></span><span id="answered" class="muted"></span></div>
+<div class="track"><div class="fill" id="fill"></div></div>
+
+<section class="card" id="case">
+  <p class="label">The offer · العرض</p>
+  <p class="source" id="terms" dir="auto"></p>
+  <p class="label">What the person believes · ما يعتقده الشخص</p>
+  <p class="source" id="belief" dir="auto"></p>
+  <div class="choices" id="choices" role="group" aria-label="Your answer"></div>
+  <details id="details">
+    <summary>Optional details · تفاصيل اختيارية</summary>
+    <label for="quote">Exact words from the offer · الكلمات الحرفية من العرض</label><textarea id="quote" dir="auto" rows="2"></textarea>
+    <label for="reason">Why · السبب</label><textarea id="reason" dir="auto" rows="2"></textarea>
+    <label for="price">Price · السعر</label><input id="price" dir="auto" type="text">
+    <label for="total">12-month total · إجمالي 12 شهرًا</label><input id="total" dir="auto" type="text">
+    <p class="muted">Left empty means not answered, never confirmed. · الخانة الفارغة تعني عدم الإجابة، وليس التأكيد.</p>
+  </details>
+  <div class="nav">
+    <button type="button" id="back">Back · السابق</button>
+    <button type="button" id="next" class="primary">Next · التالي</button>
+  </div>
+</section>
+
+<section class="card" id="end" hidden>
+  <h1 style="font-size:1.25rem;margin:0 0 6px">Review finished · اكتملت المراجعة</h1>
+  <p id="summary"></p>
+  <p class="muted">Your answers are saved in this browser. To keep a copy, save the file. · إجاباتك محفوظة في هذا المتصفح. لحفظ نسخة، احفظ الملف.</p>
+  <div class="nav">
+    <button type="button" id="return">Back to cases · العودة إلى الحالات</button>
+    <button type="button" id="save" class="primary">Save file · حفظ الملف</button>
+  </div>
+</section>
+</main>
+
+<script>
+var CASES = __CASES__;
+var INPUTS_SHA256 = "__INPUTS_SHA256__";
+var KEY = "owner-quick-review-" + INPUTS_SHA256.slice(0, 12);
+var CHOICES = [["MATCH", "MATCH", "متوافق"], ["CONTRADICTION", "CONTRADICTION", "تعارض"], ["UNKNOWN", "UNKNOWN", "غير محسوم"], ["UNSURE", "UNSURE", "لست متأكدًا"]];
+var OPTIONAL = ["quote", "reason", "price", "total"];
+var state = { index: 0, answers: {} };
+try { state = JSON.parse(localStorage.getItem(KEY)) || state; } catch (e) {}
+var $ = function (id) { return document.getElementById(id); };
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+function current() { return CASES[state.index]; }
+function answer(id) { return (state.answers[id] = state.answers[id] || {}); }
+function done() { return CASES.filter(function (c) { return answer(c.case_id).choice; }).length; }
+
+CHOICES.forEach(function (o) {
+  var b = document.createElement("button");
+  b.type = "button"; b.dataset.value = o[0];
+  b.textContent = o[1];
+  var s = document.createElement("small"); s.textContent = o[2]; b.appendChild(s);
+  b.addEventListener("click", function () {
+    answer(current().case_id).choice = o[0]; persist();
+    if ($("details").open) { show(); } else { go(1); }
+  });
+  $("choices").appendChild(b);
+});
+OPTIONAL.forEach(function (f) {
+  $(f).addEventListener("input", function () { answer(current().case_id)[f] = $(f).value; persist(); });
+});
+function go(step) {
+  state.index += step; persist(); show();
+}
+function show() {
+  var finished = state.index >= CASES.length;
+  $("case").hidden = finished; $("end").hidden = !finished;
+  var position = finished ? CASES.length : state.index + 1;
+  $("progress").textContent = "Case " + position + " of " + CASES.length + " · الحالة " + position + " من " + CASES.length;
+  $("answered").textContent = done() + " answered · تمت الإجابة";
+  $("fill").style.width = (done() / CASES.length * 100) + "%";
+  if (finished) {
+    var left = CASES.length - done();
+    $("summary").textContent = done() + " of " + CASES.length + " answered." + (left ? " " + left + " left unanswered." : "");
+    return;
+  }
+  var c = current(), a = answer(c.case_id);
+  $("terms").textContent = c.terms; $("belief").textContent = c.expectation;
+  Array.prototype.forEach.call($("choices").children, function (b) { b.setAttribute("aria-pressed", String(a.choice === b.dataset.value)); });
+  OPTIONAL.forEach(function (f) { $(f).value = a[f] || ""; });
+  $("details").open = OPTIONAL.some(function (f) { return a[f]; });
+  $("back").disabled = state.index === 0;
+}
+$("back").addEventListener("click", function () { go(-1); });
+$("next").addEventListener("click", function () { go(1); });
+$("return").addEventListener("click", function () { state.index = CASES.length - 1; persist(); show(); });
+$("save").addEventListener("click", function () {
+  var answers = {};
+  CASES.forEach(function (c) {
+    var a = answer(c.case_id), financial = a.price || a.total;
+    answers[c.case_id] = {
+      choice: a.choice || null, quote: a.quote || null, reason: a.reason || null, price: a.price || null, total: a.total || null,
+      financial_status: financial ? "owner_entered_unverified" : "not_answered"
+    };
+  });
+  var out = { form: "owner-quick-review-v2", review_type: "owner_reviewed", independently_validated: false, notice: "Owner-reviewed, not independently validated. Unanswered financial questions are not verified.", inputs_sha256: INPUTS_SHA256, saved_utc: new Date().toISOString(), answers: answers };
+  var link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }));
+  link.download = "owner_quick_review.json";
+  document.body.appendChild(link); link.click(); link.remove();
+});
+show();
+</script>
+</body>
+</html>

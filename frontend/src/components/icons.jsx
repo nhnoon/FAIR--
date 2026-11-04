@@ -132,11 +132,10 @@ export const MonitorIcon = (p) => (
   </svg>
 )
 
-/** FAIR mark: expectation and terms as two offset bars with a visible gap. Navy brand, works on both themes. */
+/** FAIR mark: expectation and terms as two offset bars with a visible gap. Takes the text colour, so it works on both themes. */
 export const FairMark = ({ size = 36 }) => (
-  <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-    <rect width="40" height="40" rx="11" fill="#F4F6FB" />
-    <rect x="9" y="9" width="8" height="22" rx="3" fill="#111D35" />
-    <rect x="23" y="14" width="8" height="17" rx="3" fill="#5B6F96" />
+  <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" focusable="false" className="text-fg">
+    <rect x="8" y="5" width="9" height="30" rx="1.5" fill="currentColor" />
+    <rect x="23" y="13" width="9" height="22" rx="1.5" fill="currentColor" opacity="0.45" />
   </svg>
 )

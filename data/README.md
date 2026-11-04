@@ -57,7 +57,7 @@ left to the model and labelled "AI interpretation" in the UI, because word lists
   read before writing it, so those rows are not independent evidence for this check.
 
 ## Challenge set
-A separate 12-case challenge set, not part of FAIR-Bench, is in `backend/evaluation/challenge/`. See `docs/COMPARISON_PROTOCOL.md`. It has never been run, and its gold file is an author draft awaiting independent review.
+A separate 12-case challenge set, not part of FAIR-Bench, is in `backend/evaluation/challenge/`. See `docs/COMPARISON_PROTOCOL.md`. Version 2 was run once against FAIR and direct Muse Spark (results in `docs/EVALUATION.md`). Its gold file is an author draft awaiting independent review.
 
 ## Known annotation notes (not changed)
 - FAIR-014, 029, 044, 059 (gold UNKNOWN: renewal not stated): the gold evidence quotes the

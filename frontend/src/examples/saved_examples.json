@@ -1,0 +1,963 @@
+{
+ "note": "Synthetic offers and recorded Muse Spark outputs, processed by FAIR's checks when this file was built. Not live.",
+ "cases": [
+  {
+   "id": "FAIR-011",
+   "terms": "Free for 21 days. Then USD 19.99 per month, automatically renewed unless cancelled before the trial ends.",
+   "expectation": "I can cancel after the trial and definitely avoid all fees.",
+   "response": {
+    "verdict": "CONTRADICTION",
+    "verdict_downgraded": false,
+    "model_verdict": "CONTRADICTION",
+    "verdict_evidence": {
+     "quote": "Then USD 19.99 per month, automatically renewed unless cancelled before the trial ends.",
+     "verified": true,
+     "start": 18,
+     "end": 105,
+     "reason": null
+    },
+    "explanation": {
+     "en": "The offer requires cancellation before the trial ends to avoid being charged, so cancelling after the trial does not avoid all fees.",
+     "ar": "العرض يشترط الإلغاء قبل انتهاء الفترة التجريبية لتجنب الرسوم، لذلك الإلغاء بعد التجربة لا يجنّب جميع الرسوم."
+    },
+    "extracted_terms": {
+     "currency": "USD",
+     "trial_days": 21,
+     "intro_price": null,
+     "intro_periods": null,
+     "recurring_price": "19.99",
+     "billing_period": "monthly",
+     "auto_renewal": "yes",
+     "cancellation_requirement": "cancelled before the trial ends",
+     "cancel_by": "trial_end",
+     "cancel_notice": null,
+     "one_time_fees": []
+    },
+    "facts": [
+     {
+      "field": "currency",
+      "value": "USD",
+      "evidence": {
+       "quote": "Then USD 19.99 per month, automatically renewed unless cancelled before the trial ends.",
+       "verified": true,
+       "start": 18,
+       "end": 105,
+       "reason": null
+      }
+     },
+     {
+      "field": "trial_days",
+      "value": 21,
+      "evidence": {
+       "quote": "Free for 21 days.",
+       "verified": true,
+       "start": 0,
+       "end": 17,
+       "reason": null
+      }
+     },
+     {
+      "field": "recurring_price",
+      "value": "19.99",
+      "evidence": {
+       "quote": "Then USD 19.99 per month, automatically renewed unless cancelled before the trial ends.",
+       "verified": true,
+       "start": 18,
+       "end": 105,
+       "reason": null
+      }
+     },
+     {
+      "field": "billing_period",
+      "value": "monthly",
+      "evidence": {
+       "quote": "Then USD 19.99 per month, automatically renewed unless cancelled before the trial ends.",
+       "verified": true,
+       "start": 18,
+       "end": 105,
+       "reason": null
+      }
+     },
+     {
+      "field": "auto_renewal",
+      "value": "yes",
+      "evidence": {
+       "quote": "automatically renewed unless cancelled before the trial ends.",
+       "verified": true,
+       "start": 44,
+       "end": 105,
+       "reason": null
+      }
+     },
+     {
+      "field": "cancellation_requirement",
+      "value": "cancelled before the trial ends",
+      "evidence": {
+       "quote": "automatically renewed unless cancelled before the trial ends.",
+       "verified": true,
+       "start": 44,
+       "end": 105,
+       "reason": null
+      }
+     },
+     {
+      "field": "cancel_by",
+      "value": "trial_end",
+      "evidence": {
+       "quote": "automatically renewed unless cancelled before the trial ends.",
+       "verified": true,
+       "start": 44,
+       "end": 105,
+       "reason": null
+      }
+     }
+    ],
+    "rejected_facts": [],
+    "cost": {
+     "currency": "USD",
+     "trial_days": 21,
+     "due_at_signup": "0",
+     "first_paid_charge_day": 21,
+     "first_paid_charge_amount": "19.99",
+     "one_time_fees_total": "0",
+     "projections": [
+      {
+       "months": 1,
+       "status": "complete",
+       "total": "19.99",
+       "assumptions": [
+        "Counts the first 1 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel"
+       ],
+       "missing": []
+      },
+      {
+       "months": 3,
+       "status": "complete",
+       "total": "59.97",
+       "assumptions": [
+        "Counts the first 3 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel"
+       ],
+       "missing": []
+      },
+      {
+       "months": 12,
+       "status": "complete",
+       "total": "239.88",
+       "assumptions": [
+        "Counts the first 12 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel"
+       ],
+       "missing": []
+      }
+     ],
+     "notes": [],
+     "note_codes": [],
+     "withheld": [],
+     "not_counted": []
+    },
+    "warnings": [],
+    "model": "replay:muse-spark-1.3",
+    "claims": [
+     {
+      "id": "claim-1",
+      "text": "I can cancel after the trial.",
+      "topic": "cancellation",
+      "verdict": "UNKNOWN",
+      "model_verdict": "UNKNOWN",
+      "downgraded": false,
+      "reason": null,
+      "evidence": null,
+      "evidence_role": null,
+      "explanation": {
+       "en": "The terms only mention cancelling before the trial ends and say nothing about cancelling after.",
+       "ar": "الشروط تذكر الإلغاء قبل انتهاء التجربة فقط ولا تذكر الإلغاء بعدها."
+      },
+      "from_overall": false
+     },
+     {
+      "id": "claim-2",
+      "text": "Cancelling after the trial definitely avoids all fees.",
+      "topic": "fees",
+      "verdict": "CONTRADICTION",
+      "model_verdict": "CONTRADICTION",
+      "downgraded": false,
+      "reason": null,
+      "evidence": {
+       "quote": "Then USD 19.99 per month, automatically renewed unless cancelled before the trial ends.",
+       "verified": true,
+       "start": 18,
+       "end": 105,
+       "reason": null
+      },
+      "evidence_role": "contradicts",
+      "explanation": {
+       "en": "The terms charge after the trial unless cancelled before the trial ends.",
+       "ar": "الشروط تفرض الرسوم بعد التجربة ما لم يتم الإلغاء قبل انتهائها."
+      },
+      "from_overall": false
+     }
+    ],
+    "claims_summary": {
+     "overall": "CONTRADICTION",
+     "counts": {
+      "MATCH": 0,
+      "CONTRADICTION": 1,
+      "UNKNOWN": 1
+     },
+     "dropped": 0,
+     "omitted_amounts": 0
+    },
+    "decision": {
+     "continue_path": {
+      "key": "continue",
+      "status": "complete",
+      "reason": null,
+      "horizons": [
+       {
+        "months": 1,
+        "status": "complete",
+        "total": "19.99",
+        "lines": [
+         {
+          "kind": "recurring_charge",
+          "label": null,
+          "quantity": 1,
+          "unit_amount": "19.99",
+          "amount": "19.99",
+          "source_field": "recurring_price"
+         }
+        ],
+        "missing": []
+       },
+       {
+        "months": 3,
+        "status": "complete",
+        "total": "59.97",
+        "lines": [
+         {
+          "kind": "recurring_charge",
+          "label": null,
+          "quantity": 3,
+          "unit_amount": "19.99",
+          "amount": "59.97",
+          "source_field": "recurring_price"
+         }
+        ],
+        "missing": []
+       },
+       {
+        "months": 12,
+        "status": "complete",
+        "total": "239.88",
+        "lines": [
+         {
+          "kind": "recurring_charge",
+          "label": null,
+          "quantity": 12,
+          "unit_amount": "19.99",
+          "amount": "239.88",
+          "source_field": "recurring_price"
+         }
+        ],
+        "missing": []
+       }
+      ],
+      "assumption_codes": [
+       "horizon",
+       "no_cancel"
+      ],
+      "deadline": null
+     },
+     "cancel_path": {
+      "key": "cancel",
+      "status": "conditional",
+      "reason": null,
+      "horizons": [
+       {
+        "months": 1,
+        "status": "conditional",
+        "total": "0",
+        "lines": [],
+        "missing": []
+       },
+       {
+        "months": 3,
+        "status": "conditional",
+        "total": "0",
+        "lines": [],
+        "missing": []
+       },
+       {
+        "months": 12,
+        "status": "conditional",
+        "total": "0",
+        "lines": [],
+        "missing": []
+       }
+      ],
+      "assumption_codes": [
+       "cancel_before_deadline",
+       "cancellation_fee_not_stated",
+       "no_refund_assumed"
+      ],
+      "deadline": {
+       "kind": "trial_end",
+       "day": 21,
+       "notice": null,
+       "last_safe_hour": null
+      }
+     },
+     "difference": [
+      {
+       "months": 1,
+       "amount": "19.99"
+      },
+      {
+       "months": 3,
+       "amount": "59.97"
+      },
+      {
+       "months": 12,
+       "amount": "239.88"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "FAIR-012",
+   "terms": "Introductory month: USD 9.99. From month two: USD 19.99/month. Subscription continues monthly until cancelled.",
+   "expectation": "The price will never change after month twelve.",
+   "response": {
+    "verdict": "UNKNOWN",
+    "verdict_downgraded": false,
+    "model_verdict": "UNKNOWN",
+    "verdict_evidence": null,
+    "explanation": {
+     "en": "The terms state the price from month two but do not promise that it will never change after month twelve.",
+     "ar": "الشروط تذكر السعر اعتبارا من الشهر الثاني لكنها لا تعد بأنه لن يتغير أبدا بعد الشهر الثاني عشر."
+    },
+    "extracted_terms": {
+     "currency": "USD",
+     "trial_days": null,
+     "intro_price": "9.99",
+     "intro_periods": null,
+     "recurring_price": "19.99",
+     "billing_period": "monthly",
+     "auto_renewal": "yes",
+     "cancellation_requirement": null,
+     "cancel_by": "not_stated",
+     "cancel_notice": null,
+     "one_time_fees": []
+    },
+    "facts": [
+     {
+      "field": "currency",
+      "value": "USD",
+      "evidence": {
+       "quote": "Introductory month: USD 9.99.",
+       "verified": true,
+       "start": 0,
+       "end": 29,
+       "reason": null
+      }
+     },
+     {
+      "field": "intro_price",
+      "value": "9.99",
+      "evidence": {
+       "quote": "Introductory month: USD 9.99.",
+       "verified": true,
+       "start": 0,
+       "end": 29,
+       "reason": null
+      }
+     },
+     {
+      "field": "recurring_price",
+      "value": "19.99",
+      "evidence": {
+       "quote": "From month two: USD 19.99/month.",
+       "verified": true,
+       "start": 30,
+       "end": 62,
+       "reason": null
+      }
+     },
+     {
+      "field": "billing_period",
+      "value": "monthly",
+      "evidence": {
+       "quote": "Subscription continues monthly until cancelled.",
+       "verified": true,
+       "start": 63,
+       "end": 110,
+       "reason": null
+      }
+     },
+     {
+      "field": "auto_renewal",
+      "value": "yes",
+      "evidence": {
+       "quote": "Subscription continues monthly until cancelled.",
+       "verified": true,
+       "start": 63,
+       "end": 110,
+       "reason": null
+      }
+     }
+    ],
+    "rejected_facts": [
+     {
+      "field": "intro_periods",
+      "value": 1,
+      "evidence": {
+       "quote": "Introductory month: USD 9.99.",
+       "verified": false,
+       "start": null,
+       "end": null,
+       "reason": "value_not_in_quote"
+      }
+     }
+    ],
+    "cost": {
+     "currency": "USD",
+     "trial_days": 0,
+     "due_at_signup": "9.99",
+     "first_paid_charge_day": 0,
+     "first_paid_charge_amount": "9.99",
+     "one_time_fees_total": "0",
+     "projections": [
+      {
+       "months": 1,
+       "status": "conditional",
+       "total": "9.99",
+       "assumptions": [
+        "Counts the first 1 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period.",
+        "The introductory price is assumed to last one billing period (its duration is not stated)."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel",
+        "intro_one_period"
+       ],
+       "missing": []
+      },
+      {
+       "months": 3,
+       "status": "conditional",
+       "total": "49.97",
+       "assumptions": [
+        "Counts the first 3 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period.",
+        "The introductory price is assumed to last one billing period (its duration is not stated)."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel",
+        "intro_one_period"
+       ],
+       "missing": []
+      },
+      {
+       "months": 12,
+       "status": "conditional",
+       "total": "229.88",
+       "assumptions": [
+        "Counts the first 12 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period.",
+        "The introductory price is assumed to last one billing period (its duration is not stated)."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel",
+        "intro_one_period"
+       ],
+       "missing": []
+      }
+     ],
+     "notes": [
+      "No free trial is stated."
+     ],
+     "note_codes": [
+      "no_trial_stated"
+     ],
+     "withheld": [],
+     "not_counted": []
+    },
+    "warnings": [
+     "1 extracted value(s) could not be verified against the terms and were excluded."
+    ],
+    "model": "replay:muse-spark-1.3",
+    "claims": [
+     {
+      "id": "claim-1",
+      "text": "The price will never change after month 12.",
+      "topic": "price",
+      "verdict": "UNKNOWN",
+      "model_verdict": "UNKNOWN",
+      "downgraded": false,
+      "reason": null,
+      "evidence": null,
+      "evidence_role": null,
+      "explanation": {
+       "en": "No passage promises the price will stay unchanged after month 12.",
+       "ar": "لا يوجد نص يعد ببقاء السعر دون تغيير بعد الشهر 12."
+      },
+      "from_overall": false
+     }
+    ],
+    "claims_summary": {
+     "overall": "UNKNOWN",
+     "counts": {
+      "MATCH": 0,
+      "CONTRADICTION": 0,
+      "UNKNOWN": 1
+     },
+     "dropped": 0,
+     "omitted_amounts": 0
+    },
+    "decision": {
+     "continue_path": {
+      "key": "continue",
+      "status": "conditional",
+      "reason": null,
+      "horizons": [
+       {
+        "months": 1,
+        "status": "conditional",
+        "total": "9.99",
+        "lines": [
+         {
+          "kind": "intro_charge",
+          "label": null,
+          "quantity": 1,
+          "unit_amount": "9.99",
+          "amount": "9.99",
+          "source_field": "intro_price"
+         }
+        ],
+        "missing": []
+       },
+       {
+        "months": 3,
+        "status": "conditional",
+        "total": "49.97",
+        "lines": [
+         {
+          "kind": "intro_charge",
+          "label": null,
+          "quantity": 1,
+          "unit_amount": "9.99",
+          "amount": "9.99",
+          "source_field": "intro_price"
+         },
+         {
+          "kind": "recurring_charge",
+          "label": null,
+          "quantity": 2,
+          "unit_amount": "19.99",
+          "amount": "39.98",
+          "source_field": "recurring_price"
+         }
+        ],
+        "missing": []
+       },
+       {
+        "months": 12,
+        "status": "conditional",
+        "total": "229.88",
+        "lines": [
+         {
+          "kind": "intro_charge",
+          "label": null,
+          "quantity": 1,
+          "unit_amount": "9.99",
+          "amount": "9.99",
+          "source_field": "intro_price"
+         },
+         {
+          "kind": "recurring_charge",
+          "label": null,
+          "quantity": 11,
+          "unit_amount": "19.99",
+          "amount": "219.89",
+          "source_field": "recurring_price"
+         }
+        ],
+        "missing": []
+       }
+      ],
+      "assumption_codes": [
+       "horizon",
+       "no_cancel",
+       "intro_one_period"
+      ],
+      "deadline": null
+     },
+     "cancel_path": {
+      "key": "cancel",
+      "status": "unavailable",
+      "reason": "cancellation_terms_not_stated",
+      "horizons": [],
+      "assumption_codes": [],
+      "deadline": null
+     },
+     "difference": []
+    }
+   }
+  },
+  {
+   "id": "FAIR-026",
+   "terms": "التجربة مجانية لمدة 21 يومًا. بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+   "expectation": "يمكنني الإلغاء بعد انتهاء التجربة دون أي رسوم بالتأكيد.",
+   "response": {
+    "verdict": "CONTRADICTION",
+    "verdict_downgraded": false,
+    "model_verdict": "CONTRADICTION",
+    "verdict_evidence": {
+     "quote": "بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+     "verified": true,
+     "start": 30,
+     "end": 116,
+     "reason": null
+    },
+    "explanation": {
+     "en": "The terms require cancellation before the trial ends to avoid the automatic 69 SAR charge, so cancelling after the trial does not avoid fees.",
+     "ar": "تشترط الشروط الإلغاء قبل نهاية التجربة لتفادي التجديد التلقائي بمبلغ 69 SAR، لذلك الإلغاء بعد انتهائها لا يكون دون رسوم."
+    },
+    "extracted_terms": {
+     "currency": "SAR",
+     "trial_days": 21,
+     "intro_price": null,
+     "intro_periods": null,
+     "recurring_price": "69",
+     "billing_period": "monthly",
+     "auto_renewal": "yes",
+     "cancellation_requirement": "الإلغاء قبل نهاية التجربة",
+     "cancel_by": "trial_end",
+     "cancel_notice": null,
+     "one_time_fees": []
+    },
+    "facts": [
+     {
+      "field": "currency",
+      "value": "SAR",
+      "evidence": {
+       "quote": "بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+       "verified": true,
+       "start": 30,
+       "end": 116,
+       "reason": null
+      }
+     },
+     {
+      "field": "trial_days",
+      "value": 21,
+      "evidence": {
+       "quote": "التجربة مجانية لمدة 21 يومًا.",
+       "verified": true,
+       "start": 0,
+       "end": 29,
+       "reason": null
+      }
+     },
+     {
+      "field": "recurring_price",
+      "value": "69",
+      "evidence": {
+       "quote": "بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+       "verified": true,
+       "start": 30,
+       "end": 116,
+       "reason": null
+      }
+     },
+     {
+      "field": "billing_period",
+      "value": "monthly",
+      "evidence": {
+       "quote": "بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+       "verified": true,
+       "start": 30,
+       "end": 116,
+       "reason": null
+      }
+     },
+     {
+      "field": "auto_renewal",
+      "value": "yes",
+      "evidence": {
+       "quote": "بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+       "verified": true,
+       "start": 30,
+       "end": 116,
+       "reason": null
+      }
+     },
+     {
+      "field": "cancellation_requirement",
+      "value": "الإلغاء قبل نهاية التجربة",
+      "evidence": {
+       "quote": "بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+       "verified": true,
+       "start": 30,
+       "end": 116,
+       "reason": null
+      }
+     },
+     {
+      "field": "cancel_by",
+      "value": "trial_end",
+      "evidence": {
+       "quote": "بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+       "verified": true,
+       "start": 30,
+       "end": 116,
+       "reason": null
+      }
+     }
+    ],
+    "rejected_facts": [],
+    "cost": {
+     "currency": "SAR",
+     "trial_days": 21,
+     "due_at_signup": "0",
+     "first_paid_charge_day": 21,
+     "first_paid_charge_amount": "69",
+     "one_time_fees_total": "0",
+     "projections": [
+      {
+       "months": 1,
+       "status": "complete",
+       "total": "69",
+       "assumptions": [
+        "Counts the first 1 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel"
+       ],
+       "missing": []
+      },
+      {
+       "months": 3,
+       "status": "complete",
+       "total": "207",
+       "assumptions": [
+        "Counts the first 3 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel"
+       ],
+       "missing": []
+      },
+      {
+       "months": 12,
+       "status": "complete",
+       "total": "828",
+       "assumptions": [
+        "Counts the first 12 month(s) of billing, starting when the free trial (if any) ends.",
+        "Assumes you do not cancel during this period."
+       ],
+       "assumption_codes": [
+        "horizon",
+        "no_cancel"
+       ],
+       "missing": []
+      }
+     ],
+     "notes": [],
+     "note_codes": [],
+     "withheld": [],
+     "not_counted": []
+    },
+    "warnings": [],
+    "model": "replay:muse-spark-1.3",
+    "claims": [
+     {
+      "id": "claim-1",
+      "text": "يمكنني الإلغاء بعد انتهاء التجربة.",
+      "topic": "cancellation",
+      "verdict": "UNKNOWN",
+      "model_verdict": "UNKNOWN",
+      "downgraded": false,
+      "reason": null,
+      "evidence": null,
+      "evidence_role": null,
+      "explanation": {
+       "en": "The terms do not state whether cancellation after the trial is possible.",
+       "ar": "لا تذكر الشروط ما إذا كان الإلغاء ممكنًا بعد انتهاء التجربة."
+      },
+      "from_overall": false
+     },
+     {
+      "id": "claim-2",
+      "text": "الإلغاء بعد انتهاء التجربة يكون دون أي رسوم بالتأكيد.",
+      "topic": "fees",
+      "verdict": "CONTRADICTION",
+      "model_verdict": "CONTRADICTION",
+      "downgraded": false,
+      "reason": null,
+      "evidence": {
+       "quote": "بعدها يتجدد الاشتراك تلقائيًا بمبلغ 69 SAR شهريًا ما لم يتم الإلغاء قبل نهاية التجربة.",
+       "verified": true,
+       "start": 30,
+       "end": 116,
+       "reason": null
+      },
+      "evidence_role": "contradicts",
+      "explanation": {
+       "en": "The terms require cancellation before the trial ends to avoid the 69 SAR renewal charge.",
+       "ar": "تشترط الشروط الإلغاء قبل نهاية التجربة لتفادي رسوم التجديد البالغة 69 SAR."
+      },
+      "from_overall": false
+     }
+    ],
+    "claims_summary": {
+     "overall": "CONTRADICTION",
+     "counts": {
+      "MATCH": 0,
+      "CONTRADICTION": 1,
+      "UNKNOWN": 1
+     },
+     "dropped": 0,
+     "omitted_amounts": 0
+    },
+    "decision": {
+     "continue_path": {
+      "key": "continue",
+      "status": "complete",
+      "reason": null,
+      "horizons": [
+       {
+        "months": 1,
+        "status": "complete",
+        "total": "69",
+        "lines": [
+         {
+          "kind": "recurring_charge",
+          "label": null,
+          "quantity": 1,
+          "unit_amount": "69",
+          "amount": "69",
+          "source_field": "recurring_price"
+         }
+        ],
+        "missing": []
+       },
+       {
+        "months": 3,
+        "status": "complete",
+        "total": "207",
+        "lines": [
+         {
+          "kind": "recurring_charge",
+          "label": null,
+          "quantity": 3,
+          "unit_amount": "69",
+          "amount": "207",
+          "source_field": "recurring_price"
+         }
+        ],
+        "missing": []
+       },
+       {
+        "months": 12,
+        "status": "complete",
+        "total": "828",
+        "lines": [
+         {
+          "kind": "recurring_charge",
+          "label": null,
+          "quantity": 12,
+          "unit_amount": "69",
+          "amount": "828",
+          "source_field": "recurring_price"
+         }
+        ],
+        "missing": []
+       }
+      ],
+      "assumption_codes": [
+       "horizon",
+       "no_cancel"
+      ],
+      "deadline": null
+     },
+     "cancel_path": {
+      "key": "cancel",
+      "status": "conditional",
+      "reason": null,
+      "horizons": [
+       {
+        "months": 1,
+        "status": "conditional",
+        "total": "0",
+        "lines": [],
+        "missing": []
+       },
+       {
+        "months": 3,
+        "status": "conditional",
+        "total": "0",
+        "lines": [],
+        "missing": []
+       },
+       {
+        "months": 12,
+        "status": "conditional",
+        "total": "0",
+        "lines": [],
+        "missing": []
+       }
+      ],
+      "assumption_codes": [
+       "cancel_before_deadline",
+       "cancellation_fee_not_stated",
+       "no_refund_assumed"
+      ],
+      "deadline": {
+       "kind": "trial_end",
+       "day": 21,
+       "notice": null,
+       "last_safe_hour": null
+      }
+     },
+     "difference": [
+      {
+       "months": 1,
+       "amount": "69"
+      },
+      {
+       "months": 3,
+       "amount": "207"
+      },
+      {
+       "months": 12,
+       "amount": "828"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

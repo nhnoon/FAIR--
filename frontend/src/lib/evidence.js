@@ -67,3 +67,23 @@ export function highlightRanges(verifiedItems) {
     .filter((it) => Number.isInteger(it.evidence.start) && Number.isInteger(it.evidence.end))
     .map((it) => ({ id: it.id, start: it.evidence.start, end: it.evidence.end }))
 }
+
+/** The result's overall verdict: claim by claim when claims exist. */
+export const overallVerdict = (data) => data.claims_summary?.overall || data.verdict
+
+/** The verified sentence that decides the overall verdict, or the closest one for UNKNOWN; null when there is none. */
+export function decidingQuote(data) {
+  const overall = overallVerdict(data)
+  const claims = data.claims || []
+  const claim = claims.find((c) => c.verdict === overall && !c.downgraded && c.evidence?.verified && overall !== 'UNKNOWN')
+  if (claim) return claim.evidence.quote
+  if (overall === 'UNKNOWN') return null
+  return !claims.length && data.verdict_evidence?.verified ? data.verdict_evidence.quote : null
+}
+
+/** The evidence id for that sentence, so the reveal can open it in the source text. */
+export function decidingEvidenceId(data) {
+  const overall = overallVerdict(data)
+  const claim = (data.claims || []).find((c) => c.verdict === overall && !c.downgraded && c.evidence?.verified)
+  return claim ? claim.id : 'verdict'
+}
