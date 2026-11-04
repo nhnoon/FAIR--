@@ -12,9 +12,11 @@ Muse Spark (`muse-spark-1.3`, via the Meta Model API) does the reading. Determin
 
 ## Watch the demo
 
-**The demo video (about 3 minutes) has not been published yet.** It will be linked here once it is.
+**▶ [Watch the FAIR demo on YouTube](https://youtu.be/V9EQDyUCFNE)** (about 3 minutes)
 
-<!-- DEMO VIDEO: replace the line above with the GitHub-hosted video URL on its own line. -->
+<p align="center">
+  <a href="https://youtu.be/V9EQDyUCFNE"><img src="https://img.youtube.com/vi/V9EQDyUCFNE/hqdefault.jpg" alt="FAIR demo video on YouTube" width="560"></a>
+</p>
 
 ## Screenshots
 
@@ -175,7 +177,7 @@ These are unresolved in the current code:
 - **Privacy.** In live mode, the text you enter goes to the FAIR server and then to the Meta Model API, where Meta's terms apply. The FAIR server does not store it, and its logs hold only metadata such as verdicts, latency and token counts.
 - **Not deployed.** There is no public website for FAIR. It runs locally, as described above, and deployment notes are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 - **Status:** a hackathon project for the Meta Global AI Developer Hackathon. Raw evaluation runs are kept locally and identified by hash in [docs/EVALUATION.md](docs/EVALUATION.md).
-- **License:** none has been chosen yet.
+- **License:** MIT. See [LICENSE](LICENSE).
 
 ## Repository layout
 
